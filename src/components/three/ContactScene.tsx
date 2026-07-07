@@ -7,7 +7,7 @@ import { useMemo, useRef } from "react";
 const PALETTE = ["#3b82f6", "#06b6d4", "#10b981"];
 
 /** Points distributed on a fibonacci sphere — a minimal wire "globe". */
-function Globe({ dark }: { dark: boolean }) {
+function Globe() {
   const group = useRef<THREE.Group>(null);
   const count = 900;
 
@@ -25,13 +25,13 @@ function Globe({ dark }: { dark: boolean }) {
       pos[i * 3 + 1] = y * R;
       pos[i * 3 + 2] = Math.sin(theta) * r * R;
       c.set(PALETTE[i % PALETTE.length]);
-      c.multiplyScalar(dark ? 0.45 + (i % 7) * 0.08 : 0.5 + (i % 5) * 0.06);
+      c.multiplyScalar(0.5 + (i % 5) * 0.06);
       col[i * 3] = c.r;
       col[i * 3 + 1] = c.g;
       col[i * 3 + 2] = c.b;
     }
     return [pos, col];
-  }, [dark]);
+  }, []);
 
   useFrame((state, delta) => {
     if (!group.current) return;
@@ -48,7 +48,7 @@ function Globe({ dark }: { dark: boolean }) {
   return (
     <group ref={group} rotation={[0.2, 0, 0]}>
       <points>
-        <bufferGeometry key={dark ? "d" : "l"}>
+        <bufferGeometry>
           <bufferAttribute attach="attributes-position" args={[positions, 3]} />
           <bufferAttribute attach="attributes-color" args={[colors, 3]} />
         </bufferGeometry>
@@ -56,17 +56,17 @@ function Globe({ dark }: { dark: boolean }) {
           size={0.06}
           vertexColors
           transparent
-          opacity={dark ? 0.85 : 0.85}
+          opacity={0.85}
           sizeAttenuation
           depthWrite={false}
-          blending={dark ? THREE.AdditiveBlending : THREE.NormalBlending}
+          blending={THREE.NormalBlending}
         />
       </points>
       {/* orbit rings */}
       <mesh rotation={[1.35, 0.2, 0]}>
         <torusGeometry args={[3.4, 0.006, 8, 128]} />
         <meshBasicMaterial
-          color={dark ? "#06b6d4" : "#0891b2"}
+          color="#0891b2"
           transparent
           opacity={0.4}
         />
@@ -74,7 +74,7 @@ function Globe({ dark }: { dark: boolean }) {
       <mesh rotation={[1.1, -0.4, 0.5]}>
         <torusGeometry args={[3.8, 0.004, 8, 128]} />
         <meshBasicMaterial
-          color={dark ? "#10b981" : "#059669"}
+          color="#059669"
           transparent
           opacity={0.3}
         />
@@ -83,7 +83,7 @@ function Globe({ dark }: { dark: boolean }) {
   );
 }
 
-export default function ContactScene({ dark = false }: { dark?: boolean }) {
+export default function ContactScene() {
   return (
     <Canvas
       camera={{ position: [0, 0, 8], fov: 45 }}
@@ -92,7 +92,7 @@ export default function ContactScene({ dark = false }: { dark?: boolean }) {
       className="absolute inset-0"
       aria-hidden
     >
-      <Globe dark={dark} />
+      <Globe />
     </Canvas>
   );
 }

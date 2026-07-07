@@ -1,9 +1,9 @@
 import { Aurora } from "@/components/providers/Aurora";
 import { CursorGlow } from "@/components/providers/CursorGlow";
 import { CursorTrail } from "@/components/providers/CursorTrail";
-import { Preloader } from "@/components/providers/Preloader";
+import { EntryGate } from "@/components/providers/EntryGate";
+import { GateProvider } from "@/components/providers/GateProvider";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
-import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { About } from "@/components/sections/About";
 import { Achievements } from "@/components/sections/Achievements";
 import { Contact } from "@/components/sections/Contact";
@@ -19,13 +19,13 @@ import { TechStack } from "@/components/sections/TechStack";
 
 export default function Home() {
   return (
-    <ThemeProvider>
-      <SmoothScroll>
-        <Preloader />
-        <Aurora />
-        <CursorGlow />
-        <CursorTrail />
-        <Navbar />
+    <GateProvider>
+        <SmoothScroll>
+          <EntryGate />
+          <Aurora />
+          <CursorGlow />
+          <CursorTrail />
+          <Navbar />
         <main>
           <Hero />
           <hr className="hr-glow" />
@@ -45,10 +45,10 @@ export default function Home() {
           <hr className="hr-glow" />
           <Achievements />
           <hr className="hr-glow" />
-          <Contact />
-        </main>
-        <Footer />
-      </SmoothScroll>
-    </ThemeProvider>
+            <Contact />
+          </main>
+          <Footer />
+        </SmoothScroll>
+    </GateProvider>
   );
 }

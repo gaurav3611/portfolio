@@ -5,7 +5,7 @@ import { Download, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { site } from "@/lib/data";
 import { Magnetic } from "@/components/ui/MagneticButton";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { useGate } from "@/components/providers/GateProvider";
 
 const links = [
   { href: "#about", label: "About" },
@@ -19,6 +19,7 @@ const links = [
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const { entered } = useGate();
   const { scrollY } = useScroll();
 
   useEffect(
@@ -30,8 +31,12 @@ export function Navbar() {
     <>
       <motion.header
         initial={{ y: -80, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.7, delay: 1.7, ease: [0.21, 0.47, 0.32, 0.98] }}
+        animate={entered ? { y: 0, opacity: 1 } : { y: -80, opacity: 0 }}
+        transition={{
+          duration: 0.7,
+          delay: entered ? 0.15 : 0,
+          ease: [0.21, 0.47, 0.32, 0.98],
+        }}
         className="fixed inset-x-0 top-0 z-50"
       >
         <nav
@@ -61,7 +66,6 @@ export function Navbar() {
           </ul>
 
           <div className="flex items-center gap-3">
-            <ThemeToggle />
             <Magnetic className="hidden lg:block">
               <a
                 href={site.resumeUrl}
@@ -95,16 +99,13 @@ export function Navbar() {
               <span className="font-display text-lg font-bold">
                 gaurav<span className="text-gradient">.gandhi</span>
               </span>
-              <div className="flex items-center gap-2">
-                <ThemeToggle />
-                <button
-                  onClick={() => setOpen(false)}
-                  className="rounded-lg p-2"
-                  aria-label="Close menu"
-                >
-                  <X className="size-6" />
-                </button>
-              </div>
+              <button
+                onClick={() => setOpen(false)}
+                className="rounded-lg p-2"
+                aria-label="Close menu"
+              >
+                <X className="size-6" />
+              </button>
             </div>
             <ul className="flex flex-1 flex-col justify-center gap-2 px-8">
               {links.map((l, i) => (

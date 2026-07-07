@@ -16,7 +16,6 @@ import { useRef, useState } from "react";
 import { site } from "@/lib/data";
 import { Magnetic } from "@/components/ui/MagneticButton";
 import { Reveal } from "@/components/ui/Reveal";
-import { useTheme } from "@/components/providers/ThemeProvider";
 
 const ContactScene = dynamic(() => import("@/components/three/ContactScene"), {
   ssr: false,
@@ -27,7 +26,6 @@ export function Contact() {
   const sectionRef = useRef<HTMLElement>(null);
   // mount the globe only once the section is near the viewport
   const inView = useInView(sectionRef, { once: true, margin: "500px" });
-  const { theme } = useTheme();
 
   async function copyEmail() {
     try {
@@ -56,7 +54,7 @@ export function Contact() {
           aria-hidden
           className="pointer-events-none absolute top-1/2 left-1/2 hidden size-[56rem] -translate-x-1/2 -translate-y-1/2 opacity-60 [mask-image:radial-gradient(circle_at_50%_50%,#000,transparent_72%)] md:block"
         >
-          <ContactScene dark={theme === "dark"} />
+          <ContactScene />
         </div>
       )}
 

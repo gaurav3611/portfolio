@@ -8,17 +8,20 @@ export function Counter({
   suffix = "",
   duration = 1.6,
   className,
+  enabled = true,
 }: {
   value: number;
   suffix?: string;
   duration?: number;
   className?: string;
+  /** Hold the count-up until e.g. the entry gate has opened. */
+  enabled?: boolean;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });
 
   useEffect(() => {
-    if (!inView || !ref.current) return;
+    if (!inView || !enabled || !ref.current) return;
     const node = ref.current;
     const controls = animate(0, value, {
       duration,
@@ -28,7 +31,7 @@ export function Counter({
       },
     });
     return () => controls.stop();
-  }, [inView, value, suffix, duration]);
+  }, [inView, enabled, value, suffix, duration]);
 
   return (
     <span ref={ref} className={className}>

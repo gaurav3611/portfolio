@@ -1,8 +1,7 @@
 @import "tailwindcss";
 
-/* ── Theme palettes ─────────────────────────────────
-   Light is the default; [data-theme="dark"] flips the
-   neutrals. Brand colors stay constant across themes. */
+/* ── Palette ────────────────────────────────────────
+   Single light theme; brand colors are constant. */
 :root {
   --bg: #f7f7f9;
   --surface: #ffffff;
@@ -16,18 +15,6 @@
   color-scheme: light;
 }
 
-:root[data-theme="dark"] {
-  --bg: #09090b;
-  --surface: #18181b;
-  --surface-2: #27272a;
-  --fg: #ffffff;
-  --muted-c: #a1a1aa;
-  --glass-bg: rgb(24 24 27 / 0.62);
-  --card-bg: linear-gradient(180deg, #1a1a1e, #18181b);
-  --card-hover-shadow: 0 24px 60px -24px rgb(59 130 246 / 0.25);
-  --aurora-opacity: 0.11;
-  color-scheme: dark;
-}
 
 @theme inline {
   /* ── Color system ─────────────────────────────── */

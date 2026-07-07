@@ -6,7 +6,6 @@ import { useRef } from "react";
 import { journey } from "@/lib/data";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { useTheme } from "@/components/providers/ThemeProvider";
 
 const FloatingShapes = dynamic(
   () => import("@/components/three/FloatingShapes"),
@@ -17,7 +16,6 @@ export function Journey() {
   const trackRef = useRef<HTMLOListElement>(null);
   const shapesRef = useRef<HTMLDivElement>(null);
   const shapesInView = useInView(shapesRef, { once: true, margin: "400px" });
-  const { theme } = useTheme();
   const { scrollYProgress } = useScroll({
     target: trackRef,
     offset: ["start 70%", "end 65%"],
@@ -33,7 +31,7 @@ export function Journey() {
         className="pointer-events-none absolute top-32 right-0 bottom-12 hidden w-2/5 lg:block"
       >
         <div className="sticky top-24 h-[36rem] [mask-image:radial-gradient(ellipse_70%_70%_at_50%_50%,#000,transparent_80%)]">
-          {shapesInView && <FloatingShapes dark={theme === "dark"} />}
+          {shapesInView && <FloatingShapes />}
         </div>
       </div>
       <SectionHeading

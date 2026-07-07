@@ -12,14 +12,14 @@ import { useEffect, useRef, useState } from "react";
 import { hero, site } from "@/lib/data";
 import { Counter } from "@/components/ui/Counter";
 import { Magnetic } from "@/components/ui/MagneticButton";
-import { useTheme } from "@/components/providers/ThemeProvider";
+import { useGate } from "@/components/providers/GateProvider";
 
 const HeroScene = dynamic(() => import("@/components/three/HeroScene"), {
   ssr: false,
 });
 
-/** Word-by-word headline reveal. */
-function Headline() {
+/** Word-by-word headline reveal — plays once the entry gate opens. */
+function Headline({ entered }: { entered: boolean }) {
   return (
     <h1 className="font-display text-5xl leading-[1.04] font-bold tracking-tight text-balance sm:text-6xl md:text-7xl xl:text-[5.25rem]">
       {hero.headline.map((line, li) => (
@@ -31,15 +31,15 @@ function Headline() {
                 li === 1 ? "text-gradient" : "text-foreground"
               }`}
               initial={{ y: "110%", rotate: 3 }}
-              animate={{ y: 0, rotate: 0 }}
+              animate={entered ? { y: 0, rotate: 0 } : { y: "110%", rotate: 3 }}
               transition={{
                 duration: 0.85,
-                delay: 1.75 + li * 0.15 + wi * 0.06,
+                delay: entered ? 0.35 + li * 0.15 + wi * 0.06 : 0,
                 ease: [0.21, 0.47, 0.32, 0.98],
               }}
             >
               {word}
-              {" "}
+              {" "}
             </motion.span>
           ))}
         </span>
@@ -73,14 +73,8 @@ function RoleTicker() {
   );
 }
 
-const fadeUp = (delay: number) => ({
-  initial: { opacity: 0, y: 24 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.7, delay, ease: [0.21, 0.47, 0.32, 0.98] as const },
-});
-
 export function Hero() {
-  const { theme } = useTheme();
+  const { entered } = useGate();
   const sectionRef = useRef<HTMLElement>(null);
   // scene recedes as you scroll past the hero
   const { scrollYProgress } = useScroll({
@@ -89,6 +83,16 @@ export function Hero() {
   });
   const bgOpacity = useTransform(scrollYProgress, [0, 1], [1, 0]);
   const bgScale = useTransform(scrollYProgress, [0, 1], [1, 1.12]);
+
+  const fadeUp = (delay: number) => ({
+    initial: { opacity: 0, y: 24 },
+    animate: entered ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 },
+    transition: {
+      duration: 0.7,
+      delay: entered ? delay : 0,
+      ease: [0.21, 0.47, 0.32, 0.98] as const,
+    },
+  });
 
   return (
     <section
@@ -101,7 +105,7 @@ export function Hero() {
         style={{ opacity: bgOpacity, scale: bgScale }}
         className="absolute inset-0"
       >
-        <HeroScene dark={theme === "dark"} />
+        <HeroScene />
         {/* vignette so text always sits on solid contrast */}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_35%_45%,transparent_30%,var(--color-background)_100%)]" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-linear-to-t from-background to-transparent" />
@@ -109,7 +113,7 @@ export function Hero() {
 
       <div className="section-shell relative z-10 w-full pt-28 pb-16">
         <motion.p
-          {...fadeUp(1.6)}
+          {...fadeUp(0.2)}
           className="mb-6 flex items-center gap-3 font-mono text-sm tracking-[0.2em] text-muted uppercase"
         >
           <span className="relative flex size-2">
@@ -119,22 +123,22 @@ export function Hero() {
           {hero.eyebrow}
         </motion.p>
 
-        <Headline />
+        <Headline entered={entered} />
 
         <motion.p
-          {...fadeUp(2.5)}
+          {...fadeUp(1.1)}
           className="mt-7 max-w-2xl text-lg leading-relaxed text-muted md:text-xl"
         >
           {hero.sub}
         </motion.p>
 
-        <motion.p {...fadeUp(2.65)} className="mt-4 text-base text-muted">
+        <motion.p {...fadeUp(1.25)} className="mt-4 text-base text-muted">
           <span className="text-foreground/70">Currently operating as a</span>{" "}
           <RoleTicker />
         </motion.p>
 
         <motion.div
-          {...fadeUp(2.8)}
+          {...fadeUp(1.4)}
           className="mt-10 flex flex-wrap items-center gap-4"
         >
           <Magnetic>
@@ -169,14 +173,14 @@ export function Hero() {
 
         {/* stats */}
         <motion.dl
-          {...fadeUp(3.0)}
+          {...fadeUp(1.6)}
           className="mt-16 grid max-w-3xl grid-cols-2 gap-x-8 gap-y-8 md:grid-cols-4"
         >
           {hero.stats.map((s) => (
             <div key={s.label}>
               <dt className="sr-only">{s.label}</dt>
               <dd className="font-display text-3xl font-bold md:text-4xl">
-                <Counter value={s.value} suffix={s.suffix} />
+                <Counter value={s.value} suffix={s.suffix} enabled={entered} />
               </dd>
               <dd className="mt-1.5 text-sm leading-snug text-muted">
                 {s.label}
@@ -191,8 +195,8 @@ export function Hero() {
         href="#about"
         aria-label="Scroll to About"
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 3.4, duration: 0.8 }}
+        animate={{ opacity: entered ? 1 : 0 }}
+        transition={{ delay: entered ? 2 : 0, duration: 0.8 }}
         className="absolute bottom-7 left-1/2 z-10 -translate-x-1/2"
       >
         <motion.span

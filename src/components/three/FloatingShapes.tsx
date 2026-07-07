@@ -6,7 +6,7 @@ import * as THREE from "three";
 import { useRef } from "react";
 
 /** Trio of slowly tumbling wireframe solids — background depth for sections. */
-function Shapes({ dark }: { dark: boolean }) {
+function Shapes() {
   const ico = useRef<THREE.Mesh>(null);
   const knot = useRef<THREE.Mesh>(null);
   const octa = useRef<THREE.Mesh>(null);
@@ -39,10 +39,10 @@ function Shapes({ dark }: { dark: boolean }) {
         <mesh ref={ico} position={[0.4, 2.3, 0]}>
           <icosahedronGeometry args={[1.05, 0]} />
           <meshBasicMaterial
-            color={dark ? "#3b82f6" : "#2563eb"}
+            color="#2563eb"
             wireframe
             transparent
-            opacity={dark ? 0.35 : 0.4}
+            opacity={0.4}
           />
         </mesh>
       </Float>
@@ -50,10 +50,10 @@ function Shapes({ dark }: { dark: boolean }) {
         <mesh ref={knot} position={[-0.6, -0.2, -0.5]}>
           <torusKnotGeometry args={[0.62, 0.2, 72, 10]} />
           <meshBasicMaterial
-            color={dark ? "#06b6d4" : "#0891b2"}
+            color="#0891b2"
             wireframe
             transparent
-            opacity={dark ? 0.28 : 0.32}
+            opacity={0.32}
           />
         </mesh>
       </Float>
@@ -61,10 +61,10 @@ function Shapes({ dark }: { dark: boolean }) {
         <mesh ref={octa} position={[0.7, -2.5, -0.2]}>
           <octahedronGeometry args={[0.85, 0]} />
           <meshBasicMaterial
-            color={dark ? "#10b981" : "#059669"}
+            color="#059669"
             wireframe
             transparent
-            opacity={dark ? 0.35 : 0.4}
+            opacity={0.4}
           />
         </mesh>
       </Float>
@@ -72,7 +72,7 @@ function Shapes({ dark }: { dark: boolean }) {
   );
 }
 
-export default function FloatingShapes({ dark = false }: { dark?: boolean }) {
+export default function FloatingShapes() {
   return (
     <Canvas
       camera={{ position: [0, 0, 6], fov: 45 }}
@@ -81,7 +81,7 @@ export default function FloatingShapes({ dark = false }: { dark?: boolean }) {
       className="absolute inset-0"
       aria-hidden
     >
-      <Shapes dark={dark} />
+      <Shapes />
     </Canvas>
   );
 }

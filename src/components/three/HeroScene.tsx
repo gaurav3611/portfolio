@@ -18,12 +18,8 @@ function mulberry32(seed: number) {
   };
 }
 
-/**
- * A flat galaxy of ~2600 points in the brand palette.
- * Additive blending glows on the dark theme; on light we keep normal
- * blending with richer colors so particles read against a pale bg.
- */
-function Particles({ count = 2600, dark }: { count?: number; dark: boolean }) {
+/** A flat galaxy of ~2600 points in the brand palette. */
+function Particles({ count = 2600 }: { count?: number }) {
   const ref = useRef<THREE.Points>(null);
 
   const [positions, colors] = useMemo(() => {
@@ -39,14 +35,13 @@ function Particles({ count = 2600, dark }: { count?: number; dark: boolean }) {
       pos[i * 3 + 2] = Math.sin(angle) * radius - 2;
 
       c.set(PALETTE[i % PALETTE.length]);
-      // dark: vary brightness for glow depth; light: keep colors saturated
-      c.multiplyScalar(dark ? 0.3 + rand() * 0.7 : 0.55 + rand() * 0.4);
+      c.multiplyScalar(0.55 + rand() * 0.4);
       col[i * 3] = c.r;
       col[i * 3 + 1] = c.g;
       col[i * 3 + 2] = c.b;
     }
     return [pos, col];
-  }, [count, dark]);
+  }, [count]);
 
   useFrame((_, delta) => {
     if (ref.current) ref.current.rotation.y += delta * 0.025;
@@ -54,7 +49,7 @@ function Particles({ count = 2600, dark }: { count?: number; dark: boolean }) {
 
   return (
     <points ref={ref} rotation={[0.35, 0, 0.12]}>
-      <bufferGeometry key={dark ? "d" : "l"}>
+      <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
         <bufferAttribute attach="attributes-color" args={[colors, 3]} />
       </bufferGeometry>
@@ -62,17 +57,17 @@ function Particles({ count = 2600, dark }: { count?: number; dark: boolean }) {
         size={0.04}
         vertexColors
         transparent
-        opacity={dark ? 0.9 : 0.65}
+        opacity={0.65}
         sizeAttenuation
         depthWrite={false}
-        blending={dark ? THREE.AdditiveBlending : THREE.NormalBlending}
+        blending={THREE.NormalBlending}
       />
     </points>
   );
 }
 
 /** Wireframe icosahedron core with a tilted orbit ring. */
-function Core({ dark }: { dark: boolean }) {
+function Core() {
   const outer = useRef<THREE.Mesh>(null);
   const inner = useRef<THREE.Mesh>(null);
   const ring = useRef<THREE.Mesh>(null);
@@ -97,27 +92,27 @@ function Core({ dark }: { dark: boolean }) {
         <mesh ref={outer}>
           <icosahedronGeometry args={[2, 1]} />
           <meshBasicMaterial
-            color={dark ? "#3b82f6" : "#2563eb"}
+            color="#2563eb"
             wireframe
             transparent
-            opacity={dark ? 0.22 : 0.3}
+            opacity={0.3}
           />
         </mesh>
         <mesh ref={inner}>
           <icosahedronGeometry args={[1.15, 0]} />
           <meshBasicMaterial
-            color={dark ? "#06b6d4" : "#0891b2"}
+            color="#0891b2"
             wireframe
             transparent
-            opacity={dark ? 0.35 : 0.42}
+            opacity={0.42}
           />
         </mesh>
         <mesh ref={ring} rotation={[1.15, 0.3, 0]}>
           <torusGeometry args={[3.1, 0.008, 8, 128]} />
           <meshBasicMaterial
-            color={dark ? "#10b981" : "#059669"}
+            color="#059669"
             transparent
-            opacity={dark ? 0.45 : 0.55}
+            opacity={0.55}
           />
         </mesh>
       </group>
@@ -146,7 +141,7 @@ function Rig() {
   return null;
 }
 
-export default function HeroScene({ dark = false }: { dark?: boolean }) {
+export default function HeroScene() {
   return (
     <Canvas
       camera={{ position: [0, 0, 9], fov: 50 }}
@@ -155,9 +150,9 @@ export default function HeroScene({ dark = false }: { dark?: boolean }) {
       className="absolute inset-0"
       aria-hidden
     >
-      <fog attach="fog" args={[dark ? "#09090b" : "#f7f7f9", 9, 22]} />
-      <Particles dark={dark} />
-      <Core dark={dark} />
+      <fog attach="fog" args={["#f7f7f9", 9, 22]} />
+      <Particles />
+      <Core />
       <Rig />
     </Canvas>
   );
