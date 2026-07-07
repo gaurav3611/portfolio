@@ -1,9 +1,14 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+  useScroll,
+  useTransform,
+} from "framer-motion";
 import { ArrowDown, ArrowRight, Download, Mail } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { hero, site } from "@/lib/data";
 import { Counter } from "@/components/ui/Counter";
 import { Magnetic } from "@/components/ui/MagneticButton";
@@ -76,15 +81,31 @@ const fadeUp = (delay: number) => ({
 
 export function Hero() {
   const { theme } = useTheme();
+  const sectionRef = useRef<HTMLElement>(null);
+  // scene recedes as you scroll past the hero
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+  const bgOpacity = useTransform(scrollYProgress, [0, 1], [1, 0]);
+  const bgScale = useTransform(scrollYProgress, [0, 1], [1, 1.12]);
+
   return (
-    <section id="top" className="relative flex min-h-svh flex-col justify-center overflow-hidden">
+    <section
+      ref={sectionRef}
+      id="top"
+      className="relative flex min-h-svh flex-col justify-center overflow-hidden"
+    >
       {/* 3D background */}
-      <div className="absolute inset-0">
+      <motion.div
+        style={{ opacity: bgOpacity, scale: bgScale }}
+        className="absolute inset-0"
+      >
         <HeroScene dark={theme === "dark"} />
         {/* vignette so text always sits on solid contrast */}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_35%_45%,transparent_30%,var(--color-background)_100%)]" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-linear-to-t from-background to-transparent" />
-      </div>
+      </motion.div>
 
       <div className="section-shell relative z-10 w-full pt-28 pb-16">
         <motion.p

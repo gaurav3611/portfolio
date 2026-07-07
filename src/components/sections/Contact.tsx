@@ -9,14 +9,25 @@ import {
   MapPin,
   Phone,
 } from "lucide-react";
+import { useInView } from "framer-motion";
+import dynamic from "next/dynamic";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/BrandIcons";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { site } from "@/lib/data";
 import { Magnetic } from "@/components/ui/MagneticButton";
 import { Reveal } from "@/components/ui/Reveal";
+import { useTheme } from "@/components/providers/ThemeProvider";
+
+const ContactScene = dynamic(() => import("@/components/three/ContactScene"), {
+  ssr: false,
+});
 
 export function Contact() {
   const [copied, setCopied] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+  // mount the globe only once the section is near the viewport
+  const inView = useInView(sectionRef, { once: true, margin: "500px" });
+  const { theme } = useTheme();
 
   async function copyEmail() {
     try {
@@ -29,12 +40,25 @@ export function Contact() {
   }
 
   return (
-    <section id="contact" className="relative overflow-hidden py-32 md:py-44">
+    <section
+      ref={sectionRef}
+      id="contact"
+      className="relative overflow-hidden py-32 md:py-44"
+    >
       {/* ambient glow behind the CTA */}
       <div
         aria-hidden
         className="pointer-events-none absolute top-1/2 left-1/2 size-[48rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgb(59_130_246/0.16),rgb(6_182_212/0.06)_50%,transparent_70%)]"
       />
+      {/* 3D points globe, vignetted so the CTA stays readable */}
+      {inView && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute top-1/2 left-1/2 hidden size-[56rem] -translate-x-1/2 -translate-y-1/2 opacity-60 [mask-image:radial-gradient(circle_at_50%_50%,#000,transparent_72%)] md:block"
+        >
+          <ContactScene dark={theme === "dark"} />
+        </div>
+      )}
 
       <div className="section-shell relative text-center">
         <Reveal>

@@ -1,5 +1,6 @@
 import { Aurora } from "@/components/providers/Aurora";
 import { CursorGlow } from "@/components/providers/CursorGlow";
+import { CursorTrail } from "@/components/providers/CursorTrail";
 import { Preloader } from "@/components/providers/Preloader";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
@@ -23,6 +24,7 @@ export default function Home() {
         <Preloader />
         <Aurora />
         <CursorGlow />
+        <CursorTrail />
         <Navbar />
         <main>
           <Hero />
