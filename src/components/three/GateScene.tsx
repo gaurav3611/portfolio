@@ -30,11 +30,19 @@ function randomDir(rand: () => number) {
 const tmpObject = new THREE.Object3D();
 
 /**
- * The breakable core: a faceted solid gem inside a wireframe cage.
- * Real lights + cast shadows sell the physicality; each hit shifts the
- * color, kicks the scale and agitates the spin.
+ * The sliceable core: a faceted solid gem inside a wireframe cage.
+ * Every cut leaves a glowing ring at the slash angle, spreads cracks
+ * (emissive wireframe) and lets more inner light leak out.
  */
-function Core({ hits, exploding }: { hits: number; exploding: boolean }) {
+function Core({
+  slices,
+  exploding,
+  cutAngles,
+}: {
+  slices: number;
+  exploding: boolean;
+  cutAngles: number[];
+}) {
   const group = useRef<THREE.Group>(null);
   const punch = useRef(0);
   const prevHits = useRef(0);
@@ -42,9 +50,9 @@ function Core({ hits, exploding }: { hits: number; exploding: boolean }) {
   useFrame((state, delta) => {
     const g = group.current;
     if (!g) return;
-    if (hits !== prevHits.current) {
-      punch.current = 1; // scale kick on every hit
-      prevHits.current = hits;
+    if (slices !== prevHits.current) {
+      punch.current = 1; // scale kick on every cut
+      prevHits.current = slices;
     }
     punch.current = Math.max(0, punch.current - delta * 3);
 
@@ -54,12 +62,12 @@ function Core({ hits, exploding }: { hits: number; exploding: boolean }) {
       return;
     }
     const t = state.clock.elapsedTime;
-    g.rotation.y += delta * (0.25 + hits * 0.35);
-    g.rotation.x = Math.sin(t * (1 + hits * 1.4)) * (0.06 + hits * 0.06);
-    g.scale.setScalar(1 + punch.current * 0.16 + hits * 0.02);
+    g.rotation.y += delta * (0.2 + slices * 0.3);
+    g.rotation.x = Math.sin(t * (1 + slices * 1.3)) * (0.05 + slices * 0.05);
+    g.scale.setScalar(1 + punch.current * 0.16 + slices * 0.02);
   });
 
-  const color = PALETTE[Math.min(hits, 2)];
+  const color = PALETTE[Math.min(slices, 2)];
   return (
     <Float speed={1.5} rotationIntensity={0.25} floatIntensity={0.5}>
       <group ref={group}>
@@ -72,17 +80,38 @@ function Core({ hits, exploding }: { hits: number; exploding: boolean }) {
             roughness={0.22}
             metalness={0.45}
             emissive={color}
-            emissiveIntensity={0.08 + hits * 0.12}
+            emissiveIntensity={0.06 + slices * 0.28}
           />
         </mesh>
+        {/* cracks: bright wireframe spreading as the core takes damage */}
+        {slices > 0 && (
+          <mesh rotation={[0.9, 0.3, 0.5]}>
+            <icosahedronGeometry args={[1.47, 1]} />
+            <meshBasicMaterial
+              color="#a5f3fc"
+              wireframe
+              transparent
+              opacity={slices * 0.2}
+            />
+          </mesh>
+        )}
+        {/* glowing cut ring left by each slash, oriented to the stroke */}
+        {cutAngles.map((angle, i) => (
+          <group key={i} rotation={[0, 0, -angle]}>
+            <mesh rotation={[1.35, 0, 0]}>
+              <torusGeometry args={[1.58, 0.016, 8, 96]} />
+              <meshBasicMaterial color="#22d3ee" transparent opacity={0.9} />
+            </mesh>
+          </group>
+        ))}
         {/* wireframe cage around it */}
         <mesh rotation={[0.4, 0.8, 0]}>
           <icosahedronGeometry args={[2.05, 1]} />
           <meshBasicMaterial
-            color={PALETTE[(hits + 1) % 3]}
+            color={PALETTE[(slices + 1) % 3]}
             wireframe
             transparent
-            opacity={0.22 + hits * 0.1}
+            opacity={0.22 + slices * 0.1}
           />
         </mesh>
       </group>
@@ -165,6 +194,64 @@ function Shards({ active }: { active: boolean }) {
   );
 }
 
+/** Fast bright fragments thrown out the instant the core detonates. */
+function BurstSparks({ active }: { active: boolean }) {
+  const count = 140;
+  const geo = useRef<THREE.BufferGeometry>(null);
+  const mat = useRef<THREE.PointsMaterial>(null);
+  const elapsed = useRef(0);
+
+  const [initial, dirs] = useMemo(() => {
+    const rand = mulberry32(9955);
+    const pos = new Float32Array(count * 3); // all zeros — burst origin
+    const d: { v: THREE.Vector3; speed: number }[] = [];
+    for (let i = 0; i < count; i++) {
+      d.push({ v: randomDir(rand), speed: 4 + rand() * 9 });
+    }
+    return [pos, d] as const;
+  }, []);
+
+  useFrame((_, delta) => {
+    const g = geo.current;
+    const m = mat.current;
+    if (!g || !m) return;
+    if (!active) {
+      elapsed.current = 0;
+      m.opacity = 0;
+      return;
+    }
+    elapsed.current += delta;
+    const t = elapsed.current;
+    const attr = g.attributes.position as THREE.BufferAttribute;
+    const arr = attr.array as Float32Array;
+    for (let i = 0; i < count; i++) {
+      const d = dirs[i];
+      arr[i * 3] = d.v.x * d.speed * t;
+      arr[i * 3 + 1] = d.v.y * d.speed * t - t * t * 2.2;
+      arr[i * 3 + 2] = d.v.z * d.speed * t;
+    }
+    attr.needsUpdate = true;
+    m.opacity = Math.max(0, 1 - t * 1.4);
+  });
+
+  return (
+    <points>
+      <bufferGeometry ref={geo}>
+        <bufferAttribute attach="attributes-position" args={[initial, 3]} />
+      </bufferGeometry>
+      <pointsMaterial
+        ref={mat}
+        size={0.07}
+        color="#22d3ee"
+        transparent
+        opacity={0}
+        sizeAttenuation
+        depthWrite={false}
+      />
+    </points>
+  );
+}
+
 /** Sparse points shell for depth behind the core. */
 function Dust() {
   const ref = useRef<THREE.Points>(null);
@@ -202,11 +289,13 @@ function Dust() {
 }
 
 export default function GateScene({
-  hits,
+  slices,
   exploding,
+  cutAngles,
 }: {
-  hits: number;
+  slices: number;
   exploding: boolean;
+  cutAngles: number[];
 }) {
   return (
     <Canvas
@@ -228,8 +317,9 @@ export default function GateScene({
       <pointLight position={[-5, -2, 3]} intensity={40} color="#06b6d4" />
 
       <Dust />
-      <Core hits={hits} exploding={exploding} />
+      <Core slices={slices} exploding={exploding} cutAngles={cutAngles} />
       <Shards active={exploding} />
+      <BurstSparks active={exploding} />
 
       {/* soft grounding shadow under the floating core; fades at the break
           so the shard swarm doesn't darken the whole plane */}

@@ -55,7 +55,7 @@ export function Skills() {
                   {group.skills.map((s) => (
                     <li
                       key={s}
-                      className="rounded-lg border border-foreground/8 bg-surface-2/60 px-3 py-1.5 text-sm text-foreground/80 transition-colors hover:border-primary/40 hover:text-foreground"
+                      className="rounded-lg border border-foreground/8 bg-surface-2/60 px-3 py-1.5 text-sm text-foreground/80 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:text-foreground hover:shadow-md hover:shadow-primary/10"
                     >
                       {s}
                     </li>

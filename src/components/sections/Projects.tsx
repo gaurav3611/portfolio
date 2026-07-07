@@ -1,9 +1,12 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, type Variants } from "framer-motion";
 import {
   ArrowRight,
+  Check,
   ChevronDown,
+  Crosshair,
+  Hammer,
   Lightbulb,
   Sparkles,
   Target,
@@ -110,6 +113,35 @@ function CoverArt({ kind }: { kind: Project["cover"] }) {
     </svg>
   );
 }
+
+/* ── Shared bits for the case-study body ──────────────────────── */
+
+function Label({
+  icon: Icon,
+  children,
+}: {
+  icon?: typeof Target;
+  children: React.ReactNode;
+}) {
+  return (
+    <h4 className="flex items-center gap-2 font-mono text-xs tracking-[0.2em] text-accent uppercase">
+      {Icon && <Icon className="size-3.5" />} {children}
+    </h4>
+  );
+}
+
+const blockStagger: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.07, delayChildren: 0.1 } },
+};
+const blockItem: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: [0.21, 0.47, 0.32, 0.98] },
+  },
+};
 
 /* ── Architecture flow: chips joined by arrows ────────────────── */
 
@@ -222,9 +254,41 @@ function CaseStudy({ project, defaultOpen }: { project: Project; defaultOpen: bo
               transition={{ duration: 0.5, ease: [0.21, 0.47, 0.32, 0.98] }}
               className="overflow-hidden"
             >
-              <div className="mt-8 space-y-10">
+              <motion.div
+                className="mt-8 space-y-12"
+                variants={blockStagger}
+                initial="hidden"
+                animate="visible"
+              >
+                {/* goal + key features */}
+                <motion.section
+                  variants={blockItem}
+                  className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]"
+                >
+                  <div className="rounded-2xl border-l-2 border-primary bg-primary/5 p-6">
+                    <Label icon={Crosshair}>The goal</Label>
+                    <p className="mt-3 leading-relaxed text-foreground/85">
+                      {project.goal}
+                    </p>
+                  </div>
+                  <div className="pt-1">
+                    <Label>Key features</Label>
+                    <ul className="mt-4 grid gap-x-6 gap-y-2.5 sm:grid-cols-2">
+                      {project.features.map((f) => (
+                        <li
+                          key={f}
+                          className="flex gap-2.5 text-sm leading-relaxed text-muted"
+                        >
+                          <Check className="mt-0.5 size-3.5 shrink-0 text-accent" />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </motion.section>
+
                 {/* architecture */}
-                <div>
+                <motion.section variants={blockItem}>
                   <h4 className="font-mono text-xs tracking-[0.2em] text-accent uppercase">
                     Architecture
                   </h4>
@@ -249,12 +313,32 @@ function CaseStudy({ project, defaultOpen }: { project: Project; defaultOpen: bo
                     </p>
                     <FlowDiagram nodes={project.flow} />
                   </div>
-                </div>
+                </motion.section>
+
+                {/* development process */}
+                <motion.section variants={blockItem}>
+                  <Label icon={Hammer}>How it was built</Label>
+                  <ol className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    {project.process.map((step, i) => (
+                      <li
+                        key={i}
+                        className="rounded-xl border border-foreground/8 bg-surface-2/40 p-5"
+                      >
+                        <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 font-mono text-xs font-semibold text-primary">
+                          {i + 1}
+                        </span>
+                        <p className="mt-3 text-sm leading-relaxed text-muted">
+                          {step}
+                        </p>
+                      </li>
+                    ))}
+                  </ol>
+                </motion.section>
 
                 {/* challenges */}
-                <div>
+                <motion.section variants={blockItem}>
                   <h4 className="font-mono text-xs tracking-[0.2em] text-accent uppercase">
-                    Hard parts & how they fell
+                    Challenges → solutions
                   </h4>
                   <div className="mt-4 grid gap-3 lg:grid-cols-3">
                     {project.challenges.map((c) => (
@@ -271,10 +355,13 @@ function CaseStudy({ project, defaultOpen }: { project: Project; defaultOpen: bo
                       </div>
                     ))}
                   </div>
-                </div>
+                </motion.section>
 
-                {/* lessons + impact */}
-                <div className="grid gap-6 lg:grid-cols-2">
+                {/* lessons + results & impact */}
+                <motion.section
+                  variants={blockItem}
+                  className="grid gap-6 lg:grid-cols-2"
+                >
                   <div>
                     <h4 className="flex items-center gap-2 font-mono text-xs tracking-[0.2em] text-accent uppercase">
                       <Lightbulb className="size-3.5" /> What it taught me
@@ -290,9 +377,20 @@ function CaseStudy({ project, defaultOpen }: { project: Project; defaultOpen: bo
                   </div>
                   <div>
                     <h4 className="flex items-center gap-2 font-mono text-xs tracking-[0.2em] text-accent uppercase">
-                      <TrendingUp className="size-3.5" /> Impact
+                      <TrendingUp className="size-3.5" /> Results & impact
                     </h4>
-                    <p className="mt-4 text-sm leading-relaxed text-foreground/85">
+                    <ul className="mt-4 space-y-2.5">
+                      {project.results.map((r, i) => (
+                        <li
+                          key={i}
+                          className="flex gap-2.5 text-sm leading-relaxed text-foreground/85"
+                        >
+                          <Check className="mt-0.5 size-3.5 shrink-0 text-success" />
+                          {r}
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="mt-4 border-t border-foreground/8 pt-4 text-sm leading-relaxed text-muted">
                       {project.impact}
                     </p>
                     {project.future && (
@@ -311,8 +409,8 @@ function CaseStudy({ project, defaultOpen }: { project: Project; defaultOpen: bo
                       </>
                     )}
                   </div>
-                </div>
-              </div>
+                </motion.section>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>

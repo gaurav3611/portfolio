@@ -165,6 +165,10 @@ export type Project = {
   cover: "swing" | "distributed" | "health" | "iot" | "automation";
   metrics: { value: string; label: string }[];
   problem: string;
+  goal: string;
+  features: string[];
+  process: string[];
+  results: string[];
   architecture: string[];
   flow: string[]; // nodes of the architecture diagram, in order
   challenges: { title: string; body: string }[];
@@ -201,6 +205,26 @@ export const projects: Project[] = [
     ],
     problem:
       "Cricket coaching relies on the naked eye. Professional swing-analysis rigs cost lakhs and live in labs; a club player gets feedback like 'swing straighter' with no data behind it. I wanted lab-grade swing telemetry from hardware that costs less than a match ticket — and a zero-install experience, because a coach on a field will never download an SDK.",
+    goal:
+      "Lab-grade swing telemetry for under \u20b91,500 — connect from a browser tab and see your swing in 3D within seconds, no installs, no cables.",
+    features: [
+      "Live 3D bat replica driven by real IMU orientation",
+      "Swing-path ribbon with bat speed & swing-plane metrics",
+      "One-tap BLE pairing straight from the browser",
+      "Session history with replay, persisted in Firebase",
+      "100Hz end-to-end pipeline at <40ms latency",
+    ],
+    process: [
+      "Prototyped sensor fusion on a breadboard with serial plots",
+      "Designed the binary BLE frame layout & negotiated throughput",
+      "Built the Three.js visualization against recorded sessions",
+      "Integrated the live pipeline, then Flask + Firebase persistence",
+    ],
+    results: [
+      "100Hz sustained streaming with no visible frame drops",
+      "<40ms sensor-to-screen latency on mid-range laptops",
+      "A complete swing lab for less than the price of a match ticket",
+    ],
     architecture: [
       "An ESP32 with an MPU6050 IMU mounts on the bat handle. Firmware samples accelerometer and gyroscope at 100Hz, runs a complementary filter on-device to fuse orientation, and packs each reading into a compact binary frame.",
       "Frames stream over a custom BLE GATT characteristic using notifications. The browser connects directly through the Web Bluetooth API — no native app — parses the binary layout with DataView, and pushes quaternions into a ring buffer.",
@@ -260,6 +284,26 @@ export const projects: Project[] = [
     ],
     problem:
       "Most student e-commerce builds are a monolith with a single database — one crash and the store is gone. I wanted to build commerce the way it actually runs at scale: services that fail independently, storage that survives a dead node, and reads that don't hammer the database on every request.",
+    goal:
+      "Build commerce infrastructure that survives real failures — dead nodes, cache races, duplicate traffic — with no single point of failure in the data path.",
+    features: [
+      "Domain-split Spring Boot services behind one gateway",
+      "ZooKeeper service registry & leader election",
+      "Ignite write-through cache for hot catalog reads",
+      "HDFS-backed assets & analytics with 3\u00d7 replication",
+      "Stateless JWT sessions — any node serves any user",
+    ],
+    process: [
+      "Modeled domains and consistency boundaries before code",
+      "Stood up ZooKeeper coordination and service skeletons",
+      "Layered Ignite caching with per-entity versioned invalidation",
+      "Chaos-tested by killing DataNodes and services mid-request",
+    ],
+    results: [
+      "Node failure: zero data loss, requests keep serving",
+      "~85% cache hit ratio on catalog reads",
+      "Stale-price bugs eliminated via write-through versioning",
+    ],
     architecture: [
       "Spring Boot services split by domain — catalog, cart, orders, auth — each owning its data and exposed through REST. A React storefront consumes them through a single gateway.",
       "ZooKeeper handles coordination: service registration, leader election for scheduled jobs, and shared configuration, so instances can join or die without manual intervention.",
@@ -306,6 +350,26 @@ export const projects: Project[] = [
     ],
     problem:
       "Cancer treatment spans years and multiple hospitals — and records get trapped in each one's silo. Patients repeat scans they've already paid for; oncologists make decisions with partial history. Centralized EHRs also make a single database breach catastrophic. The record should follow the patient, tamper-evident, with the patient controlling access.",
+    goal:
+      "Give oncology patients a record that follows them — portable across hospitals, tamper-evident by construction, and shareable strictly on their terms.",
+    features: [
+      "Client-side AES-256 encryption before data leaves the browser",
+      "IPFS content addressing — integrity checks built into storage",
+      "Per-grantee key wrapping for share & revoke",
+      "Separate doctor / patient / admin portals",
+      "Access logging on every record view",
+    ],
+    process: [
+      "Threat-modeled the data flows before writing code",
+      "Built and tested the crypto & key-wrapping layer first",
+      "Wired IPFS storage with chunked uploads and pinning",
+      "Shipped RBAC portals with every route audited",
+    ],
+    results: [
+      "Records verifiable by hash from any hospital",
+      "Sharing revocable without touching stored ciphertext",
+      "Large scans stay responsive via chunked streaming",
+    ],
     architecture: [
       "A MERN application fronts the system: React portals for patients and doctors, Express/Node APIs, MongoDB for accounts, permissions and record metadata.",
       "Medical files never touch the server unencrypted. Records are AES-encrypted client-side, then pushed to IPFS; only the content hash (CID) and encrypted key material are stored in MongoDB.",
@@ -352,6 +416,26 @@ export const projects: Project[] = [
     ],
     problem:
       "LPG leaks and kitchen fires kill precisely because detection is slow and alerts don't travel — a beeping unit in an empty house warns no one. Commercial systems with remote alerting are priced for industry, not homes. I wanted detection measured in seconds and alerts that reach a phone anywhere.",
+    goal:
+      "Cut leak-to-alert time to seconds with hardware a household can afford — and a safety path that keeps working when the internet doesn't.",
+    features: [
+      "MQ-2 + flame + DHT11 sensor fusion on an ESP32",
+      "Two-tier alerting: instant local buzzer/relay, cloud push via Blynk",
+      "Remote threshold tuning without reflashing firmware",
+      "Rolling-baseline calibration against sensor drift",
+      "Wi-Fi drop resilience with reconnection backoff",
+    ],
+    process: [
+      "Characterized sensor drift and burn-in on the bench",
+      "Built threshold logic with moving-average smoothing",
+      "Split the safety path (local) from the notification path (cloud)",
+      "Ran it in a real kitchen and tuned false positives to zero",
+    ],
+    results: [
+      "<3s leak-to-alert in every test run",
+      "Months of continuous 24/7 operation",
+      "Zero false alarms after cross-sensor gating",
+    ],
     architecture: [
       "An ESP32 polls an MQ-2 gas sensor, an IR flame sensor and a DHT11 temperature/humidity sensor on a tight loop, with calibrated thresholds and moving-average smoothing to reject transient spikes.",
       "Alerting is two-tier by design: a local buzzer and relay cutoff fire instantly with no network dependency, while the Blynk cloud pushes notifications to phones over Wi-Fi.",
@@ -398,6 +482,26 @@ export const projects: Project[] = [
     ],
     problem:
       "Small teams stitch tools together by hand — copy this form response there, ping that channel, update the sheet. SaaS automation gets expensive fast and hides your data in someone else's cloud. I wanted a self-hosted hub where a workflow is data: define a trigger, chain actions, and let the engine handle execution, retries and logging.",
+    goal:
+      "Make automation trustworthy enough to leave on: workflows as data, retries that never double-fire, and failures you can actually debug.",
+    features: [
+      "Webhook, cron and manual triggers",
+      "Idempotent step contracts with deduplication keys",
+      "Exponential-backoff retries per step",
+      "Full run timelines with per-step input/output logs",
+      "One-click replay from the failed step",
+    ],
+    process: [
+      "Designed the workflow / run / step schema first",
+      "Built the execution engine around at-least-once delivery",
+      "Added observability: run timelines and step-level logs",
+      "Hardened against duplicate webhooks and mid-step failures",
+    ],
+    results: [
+      "Duplicate webhooks never double-post — verified by test",
+      "Failed runs debuggable from the dashboard alone",
+      "Run history stays fast via summarized documents",
+    ],
     architecture: [
       "An Express/Node core exposes a REST API and a webhook ingress; workflows, runs and credentials live in MongoDB with a schema designed for querying run history efficiently.",
       "The execution engine treats each workflow as a directed chain of steps. Every run gets an ID; every step records input, output, duration and status — so a failed run is a debuggable artifact, not a mystery.",

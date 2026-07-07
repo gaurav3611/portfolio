@@ -38,8 +38,9 @@ function Headline({ entered }: { entered: boolean }) {
                 ease: [0.21, 0.47, 0.32, 0.98],
               }}
             >
+              {/* NBSP: normal spaces get trimmed inside inline-block spans */}
               {word}
-              {" "}
+              {" "}
             </motion.span>
           ))}
         </span>

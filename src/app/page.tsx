@@ -1,4 +1,5 @@
 import { Aurora } from "@/components/providers/Aurora";
+import { Cursor } from "@/components/providers/Cursor";
 import { CursorGlow } from "@/components/providers/CursorGlow";
 import { CursorTrail } from "@/components/providers/CursorTrail";
 import { EntryGate } from "@/components/providers/EntryGate";
@@ -25,6 +26,7 @@ export default function Home() {
           <Aurora />
           <CursorGlow />
           <CursorTrail />
+          <Cursor />
           <Navbar />
         <main>
           <Hero />

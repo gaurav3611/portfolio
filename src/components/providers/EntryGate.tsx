@@ -3,37 +3,54 @@
 import {
   AnimatePresence,
   motion,
+  useAnimationControls,
   useReducedMotion,
 } from "framer-motion";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useGate } from "./GateProvider";
+import { SlashCanvas, type SlashHandle } from "./SlashCanvas";
 
 const GateScene = dynamic(() => import("@/components/three/GateScene"), {
   ssr: false,
 });
 
-const HITS_NEEDED = 3;
+const SLICES_NEEDED = 3;
 
 const hints = [
-  "Click the core to break in",
-  "It's cracking — hit it again",
-  "One more.",
+  "Slash across the core to break in",
+  "First cut — the light is leaking",
+  "One more slash.",
 ];
 
 /**
- * Full-screen gate over the portfolio: a 3D core the visitor has to smash
- * three times to enter. Click/tap/Enter all count; a skip link is always
- * available, and reduced-motion visitors get a single-click entry.
+ * Full-screen gate: a solid 3D core the visitor slices open, Fruit Ninja
+ * style. Press–drag–release across the core registers a cut: the blade
+ * streak follows the pointer, sparks fly at the point of contact, a glowing
+ * cut ring is left in the core, and the screen kicks. Three cuts and the
+ * core detonates into shards behind a glow burst, then the gate lifts.
  */
 export function EntryGate() {
   const { entered, enter } = useGate();
-  const [hits, setHits] = useState(0);
+  const [slices, setSlices] = useState(0);
+  const [cutAngles, setCutAngles] = useState<number[]>([]);
   const [exploding, setExploding] = useState(false);
+  const [tapped, setTapped] = useState(false); // clicked without dragging
   const reduced = useReducedMotion();
+  const shake = useAnimationControls();
+  const slash = useRef<SlashHandle | null>(null);
+  const drag = useRef({
+    active: false,
+    sliced: false,
+    sx: 0,
+    sy: 0,
+    lx: 0,
+    ly: 0,
+    len: 0,
+  });
   const finishTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // no scrolling the portfolio while it's still locked
+  // no scrolling the portfolio while it's still sealed
   useEffect(() => {
     if (entered) return;
     document.documentElement.style.overflow = "hidden";
@@ -49,21 +66,82 @@ export function EntryGate() {
     []
   );
 
-  const smash = useCallback(() => {
-    if (exploding || entered) return;
+  const registerSlice = useCallback(
+    (angle: number, x: number, y: number) => {
+      if (exploding || entered) return;
+      slash.current?.burst(x, y, angle);
+      const next = slices + 1;
+      setSlices(next);
+      setCutAngles((a) => [...a, angle]);
+      if (next >= SLICES_NEEDED) {
+        setExploding(true);
+        shake.start({
+          x: [0, -16, 13, -8, 5, -2, 0],
+          y: [0, 9, -12, 6, -3, 1, 0],
+          transition: { duration: 0.6, ease: "easeOut" },
+        });
+        finishTimer.current = setTimeout(enter, 1100);
+      } else {
+        shake.start({
+          x: [0, -9, 7, -3, 0],
+          y: [0, 5, -6, 2, 0],
+          transition: { duration: 0.35, ease: "easeOut" },
+        });
+      }
+    },
+    [slices, exploding, entered, enter, shake]
+  );
+
+  function onPointerDown(e: React.PointerEvent) {
+    if (exploding) return;
     if (reduced) {
       enter();
       return;
     }
-    setHits((h) => {
-      const next = h + 1;
-      if (next >= HITS_NEEDED) {
-        setExploding(true);
-        finishTimer.current = setTimeout(enter, 900);
-      }
-      return next;
-    });
-  }, [exploding, entered, reduced, enter]);
+    drag.current = {
+      active: true,
+      sliced: false,
+      sx: e.clientX,
+      sy: e.clientY,
+      lx: e.clientX,
+      ly: e.clientY,
+      len: 0,
+    };
+    slash.current?.begin(e.clientX, e.clientY);
+  }
+
+  function onPointerMove(e: React.PointerEvent) {
+    const d = drag.current;
+    if (!d.active || exploding) return;
+    slash.current?.extend(e.clientX, e.clientY);
+    d.len += Math.hypot(e.clientX - d.lx, e.clientY - d.ly);
+
+    // does this stroke pass through the core's screen-space circle?
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight * 0.46;
+    const r = Math.min(window.innerWidth, window.innerHeight) * 0.24;
+    const inside = Math.hypot(e.clientX - cx, e.clientY - cy) < r;
+    if (!d.sliced && d.len > 70 && inside) {
+      d.sliced = true;
+      const angle = Math.atan2(e.clientY - d.sy, e.clientX - d.sx);
+      registerSlice(angle, e.clientX, e.clientY);
+    }
+    d.lx = e.clientX;
+    d.ly = e.clientY;
+  }
+
+  function onPointerUp() {
+    const d = drag.current;
+    if (d.active && !d.sliced && d.len < 14) setTapped(true);
+    d.active = false;
+    slash.current?.end();
+  }
+
+  const hint = exploding
+    ? "In we go."
+    : tapped && slices === 0
+      ? "Don't tap — hold, drag, slash through it"
+      : hints[Math.min(slices, hints.length - 1)];
 
   return (
     <AnimatePresence>
@@ -71,46 +149,74 @@ export function EntryGate() {
         <motion.div
           role="button"
           tabIndex={0}
-          aria-label="Break the core to enter the portfolio"
-          onClick={smash}
+          aria-label="Slash the core to enter the portfolio"
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              smash();
+              registerSlice(
+                Math.PI / 5,
+                window.innerWidth / 2,
+                window.innerHeight * 0.46
+              );
             }
           }}
           exit={{ y: "-100%" }}
-          transition={{ duration: 0.85, ease: [0.76, 0, 0.24, 1] }}
-          className="fixed inset-0 z-80 flex cursor-pointer flex-col items-center justify-between bg-background select-none"
+          transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1] }}
+          className="fixed inset-0 z-80 flex touch-none flex-col items-center justify-between bg-background select-none"
         >
-          {/* 3D core */}
-          <div className="absolute inset-0">
-            <GateScene hits={hits} exploding={exploding} />
-          </div>
+          {/* 3D core with screen shake */}
+          <motion.div animate={shake} className="absolute inset-0">
+            <GateScene
+              slices={slices}
+              exploding={exploding}
+              cutAngles={cutAngles}
+            />
+          </motion.div>
 
-          {/* pulse ring on every hit */}
+          {/* blade streak + sparks */}
+          <SlashCanvas ref={slash} />
+
+          {/* pulse ring on every cut */}
           <AnimatePresence>
-            {hits > 0 && !exploding && (
+            {slices > 0 && !exploding && (
               <motion.div
-                key={hits}
+                key={slices}
                 aria-hidden
-                className="absolute top-1/2 left-1/2 rounded-full border-2 border-secondary/60"
-                initial={{ width: 160, height: 160, x: "-50%", y: "-50%", opacity: 0.9 }}
-                animate={{ width: 560, height: 560, x: "-50%", y: "-50%", opacity: 0 }}
+                className="absolute top-[46%] left-1/2 rounded-full border-2 border-secondary/60"
+                initial={{ width: 180, height: 180, x: "-50%", y: "-50%", opacity: 0.9 }}
+                animate={{ width: 600, height: 600, x: "-50%", y: "-50%", opacity: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.7, ease: "easeOut" }}
               />
             )}
           </AnimatePresence>
-          {/* white flash when it breaks */}
+
+          {/* detonation: hot flash + expanding glow burst */}
           {exploding && (
-            <motion.div
-              aria-hidden
-              className="absolute inset-0 bg-primary"
-              initial={{ opacity: 0.25 }}
-              animate={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
-            />
+            <>
+              <motion.div
+                aria-hidden
+                className="absolute inset-0 bg-primary"
+                initial={{ opacity: 0.3 }}
+                animate={{ opacity: 0 }}
+                transition={{ duration: 0.55 }}
+              />
+              <motion.div
+                aria-hidden
+                className="absolute top-[46%] left-1/2 rounded-full"
+                style={{
+                  background:
+                    "radial-gradient(circle, rgb(255 255 255 / 0.9), rgb(34 211 238 / 0.5) 35%, transparent 70%)",
+                }}
+                initial={{ width: 120, height: 120, x: "-50%", y: "-50%", opacity: 1 }}
+                animate={{ width: 1400, height: 1400, x: "-50%", y: "-50%", opacity: 0 }}
+                transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+              />
+            </>
           )}
 
           {/* header */}
@@ -126,16 +232,16 @@ export function EntryGate() {
           {/* footer: hint + progress + skip */}
           <footer className="relative z-10 flex w-full flex-col items-center gap-5 px-6 pb-10">
             <div className="flex items-center gap-2.5" aria-hidden>
-              {Array.from({ length: HITS_NEEDED }).map((_, i) => (
+              {Array.from({ length: SLICES_NEEDED }).map((_, i) => (
                 <motion.span
                   key={i}
                   className="size-2 rounded-full"
                   animate={{
                     backgroundColor:
-                      i < hits
+                      i < slices
                         ? ["#3b82f6", "#06b6d4", "#10b981"][i]
                         : "color-mix(in srgb, var(--color-foreground) 18%, transparent)",
-                    scale: i === hits - 1 ? [1, 1.6, 1] : 1,
+                    scale: i === slices - 1 ? [1, 1.6, 1] : 1,
                   }}
                   transition={{ duration: 0.4 }}
                 />
@@ -143,14 +249,14 @@ export function EntryGate() {
             </div>
             <AnimatePresence mode="wait">
               <motion.p
-                key={exploding ? "in" : hits}
+                key={hint}
                 initial={{ y: 14, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -14, opacity: 0 }}
                 transition={{ duration: 0.3 }}
                 className="font-display text-xl font-semibold tracking-tight md:text-2xl"
               >
-                {exploding ? "In we go." : hints[Math.min(hits, hints.length - 1)]}
+                {hint}
               </motion.p>
             </AnimatePresence>
             <button
@@ -158,6 +264,7 @@ export function EntryGate() {
                 e.stopPropagation();
                 enter();
               }}
+              onPointerDown={(e) => e.stopPropagation()}
               className="rounded-lg px-3 py-1.5 text-sm text-muted underline-offset-4 transition-colors hover:text-foreground hover:underline"
             >
               Skip intro

@@ -228,7 +228,24 @@ body {
   }
 }
 
+/* Custom cursor replaces the native one on precise pointers */
+@media (pointer: fine) {
+  body,
+  a,
+  button,
+  [role="button"] {
+    cursor: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  body,
+  a,
+  button,
+  [role="button"] {
+    cursor: auto;
+  }
+
   .animate-marquee,
   .animate-marquee-reverse,
   .aurora-blob,

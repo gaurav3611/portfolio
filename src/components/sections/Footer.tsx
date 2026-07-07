@@ -20,13 +20,13 @@ export function Footer() {
 
         <div className="flex items-center gap-6">
           <nav aria-label="Footer" className="flex gap-5 text-sm text-muted">
-            <a href={site.github} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-foreground">
+            <a href={site.github} target="_blank" rel="noopener noreferrer" className="inline-block transition-all duration-300 hover:-translate-y-0.5 hover:text-foreground">
               GitHub
             </a>
-            <a href={site.linkedin} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-foreground">
+            <a href={site.linkedin} target="_blank" rel="noopener noreferrer" className="inline-block transition-all duration-300 hover:-translate-y-0.5 hover:text-foreground">
               LinkedIn
             </a>
-            <a href={`mailto:${site.email}`} className="transition-colors hover:text-foreground">
+            <a href={`mailto:${site.email}`} className="inline-block transition-all duration-300 hover:-translate-y-0.5 hover:text-foreground">
               Email
             </a>
           </nav>

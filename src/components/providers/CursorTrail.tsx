@@ -60,7 +60,7 @@ export function CursorTrail() {
         const p1 = pts[i];
         const age = (now - p1.t) / LIFE_MS; // 0 = fresh, 1 = expired
         const head = i / pts.length; // 0 = tail, 1 = cursor
-        ctx.globalAlpha = Math.max(0, (1 - age) * head * 0.6);
+        ctx.globalAlpha = Math.max(0, (1 - age) * head * 0.45);
         ctx.lineWidth = Math.max(0.5, (1 - age) * head * 7);
         ctx.strokeStyle =
           COLORS[Math.floor(head * (COLORS.length - 0.001))];

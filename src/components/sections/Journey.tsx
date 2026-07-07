@@ -52,7 +52,7 @@ export function Journey() {
           <li key={step.year} className="relative pb-12 pl-10 last:pb-0 md:pl-16">
             <span className="absolute top-1.5 -left-[5px] size-[11px] rounded-full border-2 border-background bg-primary shadow-[0_0_12px_rgb(59_130_246/0.8)]" />
             <Reveal delay={Math.min(i * 0.04, 0.2)}>
-              <p className="font-mono text-sm tracking-widest text-accent">
+              <p className="inline-flex rounded-full border border-accent/25 bg-accent/10 px-3 py-1 font-mono text-xs tracking-widest text-accent uppercase">
                 {step.year}
               </p>
               <h3 className="mt-2 font-display text-xl font-semibold md:text-2xl">
