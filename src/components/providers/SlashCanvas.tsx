@@ -21,7 +21,7 @@ type Spark = {
   color: string;
 };
 
-const SPARK_COLORS = ["#22d3ee", "#3b82f6", "#10b981", "#a5f3fc"];
+const SPARK_COLORS = ["#f43f5e", "#fb7185", "#16a34a", "#fecdd3"];
 const BLADE_LIFE = 170; // ms a blade point stays visible
 
 /**
@@ -120,7 +120,7 @@ export const SlashCanvas = forwardRef<SlashHandle>(function SlashCanvas(
             const head = i / s.pts.length;
             const fade = Math.max(0, 1 - age) * head;
             if (pass === 0) {
-              ctx.strokeStyle = "#22d3ee";
+              ctx.strokeStyle = "#f43f5e";
               ctx.globalAlpha = fade * 0.35;
               ctx.lineWidth = 3 + fade * 16;
             } else {

@@ -3,9 +3,7 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { ContactShadows, Float } from "@react-three/drei";
 import * as THREE from "three";
-import { useEffect, useMemo, useRef } from "react";
-
-const PALETTE = ["#3b82f6", "#06b6d4", "#10b981"];
+import { useMemo, useRef } from "react";
 
 /** Deterministic PRNG — keeps render-time data generation pure. */
 function mulberry32(seed: number) {
@@ -26,187 +24,244 @@ function randomDir(rand: () => number) {
   return new THREE.Vector3(Math.cos(phi) * r, Math.sin(phi) * r, z);
 }
 
-// scratch object for per-frame matrix math — module scope, never re-created
-const tmpObject = new THREE.Object3D();
+const WEDGES = 6;
+const RADIUS = 1.6;
+const WEDGE_PHI = (Math.PI * 2) / WEDGES;
 
-/**
- * The sliceable core: a faceted solid gem inside a wireframe cage.
- * Every cut leaves a glowing ring at the slash angle, spreads cracks
- * (emissive wireframe) and lets more inner light leak out.
- */
-function Core({
+/* ── Procedural watermelon textures (lazy module singletons) ──── */
+
+let rindTexture: THREE.CanvasTexture | null = null;
+function getRindTexture() {
+  if (rindTexture) return rindTexture;
+  const c = document.createElement("canvas");
+  c.width = 512;
+  c.height = 512;
+  const ctx = c.getContext("2d")!;
+  // light rind base
+  ctx.fillStyle = "#7cb95a";
+  ctx.fillRect(0, 0, 512, 512);
+  // three wavy dark stripes per wedge-width (pattern tiles per wedge)
+  ctx.fillStyle = "#1d5e2c";
+  for (let s = 0; s < 3; s++) {
+    const cx = 512 * ((s + 0.5) / 3);
+    ctx.beginPath();
+    for (let y = 0; y <= 512; y += 8) {
+      const w = 42 + Math.sin(y * 0.045 + s * 2) * 14;
+      const x = cx + Math.sin(y * 0.02 + s) * 10 - w / 2;
+      if (y === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    for (let y = 512; y >= 0; y -= 8) {
+      const w = 42 + Math.sin(y * 0.045 + s * 2) * 14;
+      const x = cx + Math.sin(y * 0.02 + s) * 10 + w / 2;
+      ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fill();
+  }
+  rindTexture = new THREE.CanvasTexture(c);
+  rindTexture.colorSpace = THREE.SRGBColorSpace;
+  return rindTexture;
+}
+
+let fleshTexture: THREE.CanvasTexture | null = null;
+function getFleshTexture() {
+  if (fleshTexture) return fleshTexture;
+  const c = document.createElement("canvas");
+  c.width = 512;
+  c.height = 512;
+  const ctx = c.getContext("2d")!;
+  const cx = 256;
+  const R = 250;
+  ctx.clearRect(0, 0, 512, 512);
+  // green skin edge
+  ctx.fillStyle = "#1d5e2c";
+  ctx.beginPath();
+  ctx.arc(cx, cx, R, 0, Math.PI * 2);
+  ctx.fill();
+  // white inner rind — the pale layer behind every piece
+  ctx.fillStyle = "#f4f7ee";
+  ctx.beginPath();
+  ctx.arc(cx, cx, R - 10, 0, Math.PI * 2);
+  ctx.fill();
+  // red flesh
+  const g = ctx.createRadialGradient(cx, cx, 20, cx, cx, R - 44);
+  g.addColorStop(0, "#fb7185");
+  g.addColorStop(0.55, "#f43f5e");
+  g.addColorStop(1, "#e11d48");
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(cx, cx, R - 44, 0, Math.PI * 2);
+  ctx.fill();
+  // black seeds, pointing outward
+  const rand = mulberry32(1145);
+  for (let i = 0; i < 30; i++) {
+    const a = rand() * Math.PI * 2;
+    const r = 55 + rand() * 135;
+    const x = cx + Math.cos(a) * r;
+    const y = cx + Math.sin(a) * r;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(a + Math.PI / 2);
+    ctx.fillStyle = rand() > 0.82 ? "#f8fafc" : "#191512";
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 4.5, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+  fleshTexture = new THREE.CanvasTexture(c);
+  fleshTexture.colorSpace = THREE.SRGBColorSpace;
+  return fleshTexture;
+}
+
+/* ── The melon: six wedges that fall apart as they're cut ─────── */
+
+type WedgeState = {
+  falling: boolean;
+  vel: THREE.Vector3;
+  ang: THREE.Vector3;
+};
+
+function Watermelon({
   slices,
   exploding,
-  cutAngles,
 }: {
   slices: number;
   exploding: boolean;
-  cutAngles: number[];
 }) {
-  const group = useRef<THREE.Group>(null);
+  const melon = useRef<THREE.Group>(null);
+  const wedgeRefs = useRef<(THREE.Group | null)[]>([]);
+  const prevSlices = useRef(0);
+  const prevExploding = useRef(false);
   const punch = useRef(0);
-  const prevHits = useRef(0);
 
-  useFrame((state, delta) => {
-    const g = group.current;
-    if (!g) return;
-    if (slices !== prevHits.current) {
-      punch.current = 1; // scale kick on every cut
-      prevHits.current = slices;
+  const rind = useMemo(() => getRindTexture(), []);
+  const flesh = useMemo(() => getFleshTexture(), []);
+
+  // per-wedge physics state + seeded tumble variation
+  const states = useRef<WedgeState[]>(
+    Array.from({ length: WEDGES }, () => ({
+      falling: false,
+      vel: new THREE.Vector3(),
+      ang: new THREE.Vector3(),
+    }))
+  );
+  const tumble = useMemo(() => {
+    const rand = mulberry32(3611);
+    return Array.from({ length: WEDGES }, () => ({
+      spin: 1.5 + rand() * 2.5,
+      jitter: randomDir(rand),
+    }));
+  }, []);
+
+  // which wedges drop on cut 1 and cut 2 (the rest blow apart on cut 3)
+  const dropPlan = [[0], [1]];
+
+  function releaseWedge(i: number, power: number, up: number) {
+    const st = states.current[i];
+    if (st.falling) return;
+    st.falling = true;
+    const phiC = i * WEDGE_PHI + WEDGE_PHI / 2;
+    // outward radial direction of this wedge (three.js sphere param)
+    const dir = new THREE.Vector3(-Math.cos(phiC), 0, Math.sin(phiC));
+    st.vel.copy(dir).multiplyScalar(power);
+    st.vel.y += up;
+    st.ang
+      .copy(tumble[i].jitter)
+      .multiplyScalar(tumble[i].spin * (power * 0.5));
+  }
+
+  useFrame((_, delta) => {
+    // react to new cuts
+    if (slices !== prevSlices.current) {
+      punch.current = 1;
+      const plan = dropPlan[slices - 1];
+      if (plan) for (const i of plan) releaseWedge(i, 1.6, 2.3);
+      prevSlices.current = slices;
+    }
+    if (exploding && !prevExploding.current) {
+      for (let i = 0; i < WEDGES; i++) releaseWedge(i, 4.5 + (i % 3), 2.8);
+      prevExploding.current = true;
     }
     punch.current = Math.max(0, punch.current - delta * 3);
 
-    if (exploding) {
-      g.scale.setScalar(Math.max(0.001, g.scale.x - delta * 8));
-      g.visible = g.scale.x > 0.01;
-      return;
+    if (melon.current) {
+      melon.current.scale.setScalar(1 + punch.current * 0.12);
     }
-    const t = state.clock.elapsedTime;
-    g.rotation.y += delta * (0.2 + slices * 0.3);
-    g.rotation.x = Math.sin(t * (1 + slices * 1.3)) * (0.05 + slices * 0.05);
-    g.scale.setScalar(1 + punch.current * 0.16 + slices * 0.02);
+
+    // integrate falling wedges
+    for (let i = 0; i < WEDGES; i++) {
+      const st = states.current[i];
+      const g = wedgeRefs.current[i];
+      if (!g || !st.falling) continue;
+      st.vel.y -= 7.5 * delta; // gravity
+      g.position.addScaledVector(st.vel, delta);
+      g.rotation.x += st.ang.x * delta;
+      g.rotation.y += st.ang.y * delta;
+      g.rotation.z += st.ang.z * delta;
+      if (g.position.y < -12) g.visible = false; // long gone
+    }
   });
 
-  const color = PALETTE[Math.min(slices, 2)];
   return (
-    <Float speed={1.5} rotationIntensity={0.25} floatIntensity={0.5}>
-      <group ref={group}>
-        {/* faceted gem — the "real" object catching light and casting shadow */}
-        <mesh castShadow>
-          <icosahedronGeometry args={[1.45, 0]} />
-          <meshStandardMaterial
-            color={color}
-            flatShading
-            roughness={0.22}
-            metalness={0.45}
-            emissive={color}
-            emissiveIntensity={0.06 + slices * 0.28}
-          />
-        </mesh>
-        {/* cracks: bright wireframe spreading as the core takes damage */}
-        {slices > 0 && (
-          <mesh rotation={[0.9, 0.3, 0.5]}>
-            <icosahedronGeometry args={[1.47, 1]} />
-            <meshBasicMaterial
-              color="#a5f3fc"
-              wireframe
-              transparent
-              opacity={slices * 0.2}
-            />
-          </mesh>
-        )}
-        {/* glowing cut ring left by each slash, oriented to the stroke */}
-        {cutAngles.map((angle, i) => (
-          <group key={i} rotation={[0, 0, -angle]}>
-            <mesh rotation={[1.35, 0, 0]}>
-              <torusGeometry args={[1.58, 0.016, 8, 96]} />
-              <meshBasicMaterial color="#22d3ee" transparent opacity={0.9} />
-            </mesh>
-          </group>
-        ))}
-        {/* wireframe cage around it */}
-        <mesh rotation={[0.4, 0.8, 0]}>
-          <icosahedronGeometry args={[2.05, 1]} />
-          <meshBasicMaterial
-            color={PALETTE[(slices + 1) % 3]}
-            wireframe
-            transparent
-            opacity={0.22 + slices * 0.1}
-          />
-        </mesh>
+    <Float speed={1.2} rotationIntensity={0.12} floatIntensity={0.35}>
+      <group ref={melon} rotation={[0.12, 0.5, -0.08]} scale={[1, 1.12, 1]}>
+        {Array.from({ length: WEDGES }).map((_, i) => {
+          const phi0 = i * WEDGE_PHI;
+          return (
+            <group
+              key={i}
+              ref={(el) => {
+                wedgeRefs.current[i] = el;
+              }}
+            >
+              {/* striped rind shell */}
+              <mesh castShadow>
+                <sphereGeometry args={[RADIUS, 48, 32, phi0, WEDGE_PHI]} />
+                <meshStandardMaterial
+                  map={rind}
+                  roughness={0.45}
+                  metalness={0.05}
+                />
+              </mesh>
+              {/* flat cut faces: red flesh, black seeds, white rind ring */}
+              {[phi0, phi0 + WEDGE_PHI].map((phi, f) => (
+                <group key={f} rotation={[0, phi + Math.PI, 0]}>
+                  <mesh>
+                    <circleGeometry
+                      args={[RADIUS * 0.995, 48, -Math.PI / 2, Math.PI]}
+                    />
+                    <meshStandardMaterial
+                      map={flesh}
+                      roughness={0.75}
+                      metalness={0}
+                      side={THREE.DoubleSide}
+                    />
+                  </mesh>
+                </group>
+              ))}
+            </group>
+          );
+        })}
       </group>
     </Float>
   );
 }
 
-/** Solid faceted shards flung outward when the core finally gives. */
-function Shards({ active }: { active: boolean }) {
-  const count = 90;
-  const mesh = useRef<THREE.InstancedMesh>(null);
-  const elapsed = useRef(0);
+/* ── Juice droplets sprayed on detonation ─────────────────────── */
 
-  const shards = useMemo(() => {
-    const rand = mulberry32(3611);
-    return Array.from({ length: count }, () => ({
-      dir: randomDir(rand),
-      speed: 2.6 + rand() * 3.6,
-      spin: 2 + rand() * 5,
-      scale: 0.09 + rand() * 0.18,
-    }));
-  }, []);
-
-  useEffect(() => {
-    const m = mesh.current;
-    if (!m) return;
-    const c = new THREE.Color();
-    for (let i = 0; i < count; i++) {
-      c.set(PALETTE[i % PALETTE.length]);
-      m.setColorAt(i, c);
-    }
-    if (m.instanceColor) m.instanceColor.needsUpdate = true;
-  }, []);
-
-  useFrame((_, delta) => {
-    const m = mesh.current;
-    if (!m) return;
-    if (!active) {
-      m.visible = false;
-      elapsed.current = 0;
-      return;
-    }
-    m.visible = true;
-    elapsed.current += delta;
-    const t = elapsed.current;
-    for (let i = 0; i < count; i++) {
-      const s = shards[i];
-      const dist = 1.4 + s.speed * t;
-      tmpObject.position.copy(s.dir).multiplyScalar(dist);
-      tmpObject.position.y -= t * t * 1.4; // slight gravity
-      tmpObject.rotation.set(s.spin * t, s.spin * t * 1.3, s.spin * t * 0.7);
-      tmpObject.scale.setScalar(s.scale * Math.max(0, 1 - t * 0.75));
-      tmpObject.updateMatrix();
-      m.setMatrixAt(i, tmpObject.matrix);
-    }
-    m.instanceMatrix.needsUpdate = true;
-    (m.material as THREE.MeshStandardMaterial).opacity = Math.max(
-      0,
-      1 - t * 0.8
-    );
-  });
-
-  return (
-    <instancedMesh
-      ref={mesh}
-      args={[undefined, undefined, count]}
-      visible={false}
-      castShadow
-    >
-      <tetrahedronGeometry args={[1, 0]} />
-      <meshStandardMaterial
-        color="#ffffff"
-        flatShading
-        roughness={0.3}
-        metalness={0.35}
-        transparent
-        opacity={1}
-      />
-    </instancedMesh>
-  );
-}
-
-/** Fast bright fragments thrown out the instant the core detonates. */
-function BurstSparks({ active }: { active: boolean }) {
-  const count = 140;
+function JuiceBurst({ active }: { active: boolean }) {
+  const count = 160;
   const geo = useRef<THREE.BufferGeometry>(null);
   const mat = useRef<THREE.PointsMaterial>(null);
   const elapsed = useRef(0);
 
   const [initial, dirs] = useMemo(() => {
     const rand = mulberry32(9955);
-    const pos = new Float32Array(count * 3); // all zeros — burst origin
+    const pos = new Float32Array(count * 3);
     const d: { v: THREE.Vector3; speed: number }[] = [];
     for (let i = 0; i < count; i++) {
-      d.push({ v: randomDir(rand), speed: 4 + rand() * 9 });
+      d.push({ v: randomDir(rand), speed: 3.5 + rand() * 8 });
     }
     return [pos, d] as const;
   }, []);
@@ -227,11 +282,11 @@ function BurstSparks({ active }: { active: boolean }) {
     for (let i = 0; i < count; i++) {
       const d = dirs[i];
       arr[i * 3] = d.v.x * d.speed * t;
-      arr[i * 3 + 1] = d.v.y * d.speed * t - t * t * 2.2;
+      arr[i * 3 + 1] = d.v.y * d.speed * t - t * t * 3;
       arr[i * 3 + 2] = d.v.z * d.speed * t;
     }
     attr.needsUpdate = true;
-    m.opacity = Math.max(0, 1 - t * 1.4);
+    m.opacity = Math.max(0, 1 - t * 1.2);
   });
 
   return (
@@ -241,46 +296,10 @@ function BurstSparks({ active }: { active: boolean }) {
       </bufferGeometry>
       <pointsMaterial
         ref={mat}
-        size={0.07}
-        color="#22d3ee"
+        size={0.08}
+        color="#e11d48"
         transparent
         opacity={0}
-        sizeAttenuation
-        depthWrite={false}
-      />
-    </points>
-  );
-}
-
-/** Sparse points shell for depth behind the core. */
-function Dust() {
-  const ref = useRef<THREE.Points>(null);
-  const positions = useMemo(() => {
-    const rand = mulberry32(1145);
-    const pos = new Float32Array(400 * 3);
-    for (let i = 0; i < 400; i++) {
-      const v = randomDir(rand).multiplyScalar(4 + rand() * 6);
-      pos[i * 3] = v.x;
-      pos[i * 3 + 1] = v.y;
-      pos[i * 3 + 2] = v.z;
-    }
-    return pos;
-  }, []);
-
-  useFrame((_, delta) => {
-    if (ref.current) ref.current.rotation.y += delta * 0.02;
-  });
-
-  return (
-    <points ref={ref}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-      </bufferGeometry>
-      <pointsMaterial
-        size={0.035}
-        color="#0891b2"
-        transparent
-        opacity={0.5}
         sizeAttenuation
         depthWrite={false}
       />
@@ -291,11 +310,9 @@ function Dust() {
 export default function GateScene({
   slices,
   exploding,
-  cutAngles,
 }: {
   slices: number;
   exploding: boolean;
-  cutAngles: number[];
 }) {
   return (
     <Canvas
@@ -306,31 +323,28 @@ export default function GateScene({
       className="absolute inset-0"
       aria-hidden
     >
-      {/* studio-ish lighting: warm key, cool fill, soft ambient */}
-      <ambientLight intensity={0.65} />
+      {/* soft daylight: warm key, cool fill, gentle ambient */}
+      <ambientLight intensity={0.85} />
       <directionalLight
         position={[4, 7, 4]}
-        intensity={1.8}
+        intensity={1.9}
         castShadow
         shadow-mapSize={[1024, 1024]}
       />
-      <pointLight position={[-5, -2, 3]} intensity={40} color="#06b6d4" />
+      <pointLight position={[-5, -2, 3]} intensity={22} color="#fef3c7" />
 
-      <Dust />
-      <Core slices={slices} exploding={exploding} cutAngles={cutAngles} />
-      <Shards active={exploding} />
-      <BurstSparks active={exploding} />
+      <Watermelon slices={slices} exploding={exploding} />
+      <JuiceBurst active={exploding} />
 
-      {/* soft grounding shadow under the floating core; fades at the break
-          so the shard swarm doesn't darken the whole plane */}
+      {/* soft grounding shadow; fades at the blast */}
       <ContactShadows
         position={[0, -2.7, 0]}
-        opacity={exploding ? 0 : 0.3}
+        opacity={exploding ? 0 : 0.32}
         scale={26}
         blur={2.8}
         far={2.6}
         resolution={512}
-        color="#0f172a"
+        color="#1c1917"
       />
     </Canvas>
   );

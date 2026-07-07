@@ -18,22 +18,21 @@ const GateScene = dynamic(() => import("@/components/three/GateScene"), {
 const SLICES_NEEDED = 3;
 
 const hints = [
-  "Slash across the core to break in",
-  "First cut — the light is leaking",
-  "One more slash.",
+  "Slash the watermelon to break in",
+  "Clean cut — keep slicing",
+  "One more slice.",
 ];
 
 /**
- * Full-screen gate: a solid 3D core the visitor slices open, Fruit Ninja
- * style. Press–drag–release across the core registers a cut: the blade
- * streak follows the pointer, sparks fly at the point of contact, a glowing
- * cut ring is left in the core, and the screen kicks. Three cuts and the
- * core detonates into shards behind a glow burst, then the gate lifts.
+ * Full-screen gate: a watermelon the visitor slices open, Fruit Ninja
+ * style. Press–drag–release across the melon registers a cut: the blade
+ * streak follows the pointer, juice sprays at the point of contact, a
+ * wedge falls away showing red flesh / black seeds / white rind, and the
+ * screen kicks. The third slice blows the rest apart, then the gate lifts.
  */
 export function EntryGate() {
   const { entered, enter } = useGate();
   const [slices, setSlices] = useState(0);
-  const [cutAngles, setCutAngles] = useState<number[]>([]);
   const [exploding, setExploding] = useState(false);
   const [tapped, setTapped] = useState(false); // clicked without dragging
   const reduced = useReducedMotion();
@@ -72,7 +71,6 @@ export function EntryGate() {
       slash.current?.burst(x, y, angle);
       const next = slices + 1;
       setSlices(next);
-      setCutAngles((a) => [...a, angle]);
       if (next >= SLICES_NEEDED) {
         setExploding(true);
         shake.start({
@@ -149,7 +147,7 @@ export function EntryGate() {
         <motion.div
           role="button"
           tabIndex={0}
-          aria-label="Slash the core to enter the portfolio"
+          aria-label="Slash the watermelon to enter the portfolio"
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
@@ -170,11 +168,7 @@ export function EntryGate() {
         >
           {/* 3D core with screen shake */}
           <motion.div animate={shake} className="absolute inset-0">
-            <GateScene
-              slices={slices}
-              exploding={exploding}
-              cutAngles={cutAngles}
-            />
+            <GateScene slices={slices} exploding={exploding} />
           </motion.div>
 
           {/* blade streak + sparks */}
@@ -186,7 +180,7 @@ export function EntryGate() {
               <motion.div
                 key={slices}
                 aria-hidden
-                className="absolute top-[46%] left-1/2 rounded-full border-2 border-secondary/60"
+                className="absolute top-[46%] left-1/2 rounded-full border-2 border-[#f43f5e]/50"
                 initial={{ width: 180, height: 180, x: "-50%", y: "-50%", opacity: 0.9 }}
                 animate={{ width: 600, height: 600, x: "-50%", y: "-50%", opacity: 0 }}
                 exit={{ opacity: 0 }}
@@ -200,8 +194,8 @@ export function EntryGate() {
             <>
               <motion.div
                 aria-hidden
-                className="absolute inset-0 bg-primary"
-                initial={{ opacity: 0.3 }}
+                className="absolute inset-0 bg-[#f43f5e]"
+                initial={{ opacity: 0.22 }}
                 animate={{ opacity: 0 }}
                 transition={{ duration: 0.55 }}
               />
@@ -210,7 +204,7 @@ export function EntryGate() {
                 className="absolute top-[46%] left-1/2 rounded-full"
                 style={{
                   background:
-                    "radial-gradient(circle, rgb(255 255 255 / 0.9), rgb(34 211 238 / 0.5) 35%, transparent 70%)",
+                    "radial-gradient(circle, rgb(255 255 255 / 0.9), rgb(244 63 94 / 0.45) 35%, transparent 70%)",
                 }}
                 initial={{ width: 120, height: 120, x: "-50%", y: "-50%", opacity: 1 }}
                 animate={{ width: 1400, height: 1400, x: "-50%", y: "-50%", opacity: 0 }}
