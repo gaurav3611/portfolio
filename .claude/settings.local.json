@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm -rf shots)",
+      "Bash(sed -i '' 's|http://localhost:3000|http://localhost:3001|' shoot.js)",
+      "Bash(node shoot.js)"
+    ]
+  }
+}
