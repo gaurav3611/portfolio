@@ -1,86 +1,41 @@
-"use client";
-
-import { motion, type Variants } from "framer-motion";
 import type { ReactNode } from "react";
 
-const variants: Variants = {
-  hidden: { opacity: 0, y: 28, filter: "blur(6px)" },
-  visible: (delay: number) => ({
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: { duration: 0.7, delay, ease: [0.21, 0.47, 0.32, 0.98] },
-  }),
-};
-
+/**
+ * Ink-panel reveal, CSS only (scroll-driven `animation-timeline: view()`).
+ * Browsers without support, reduced motion, and no-JS visitors simply see the content.
+ * `delay` is kept for call-site compatibility; scroll position drives the timing.
+ */
 export function Reveal({
   children,
-  delay = 0,
-  className,
-  once = true,
+  className = "",
+  as: Tag = "div",
 }: {
   children: ReactNode;
   delay?: number;
   className?: string;
-  once?: boolean;
+  as?: "div" | "article" | "li" | "section";
 }) {
   return (
-    <motion.div
-      className={className}
-      variants={variants}
-      custom={delay}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once, margin: "-80px" }}
-    >
+    <Tag data-reveal className={`reveal-wipe ${className}`}>
       {children}
-    </motion.div>
+    </Tag>
   );
 }
 
-/** Staggers direct children with the same rise-and-unblur reveal. */
-export function RevealGroup({
+/** Small rise for text blocks, same mechanism. */
+export function Rise({
   children,
-  className,
-  stagger = 0.08,
+  className = "",
+  as: Tag = "div",
 }: {
   children: ReactNode;
+  delay?: number;
   className?: string;
-  stagger?: number;
+  as?: "div" | "li";
 }) {
   return (
-    <motion.div
-      className={className}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ staggerChildren: stagger }}
-    >
+    <Tag data-reveal className={`reveal-rise ${className}`}>
       {children}
-    </motion.div>
-  );
-}
-
-export function RevealItem({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  return (
-    <motion.div
-      className={className}
-      variants={{
-        hidden: { opacity: 0, y: 24 },
-        visible: {
-          opacity: 1,
-          y: 0,
-          transition: { duration: 0.6, ease: [0.21, 0.47, 0.32, 0.98] },
-        },
-      }}
-    >
-      {children}
-    </motion.div>
+    </Tag>
   );
 }

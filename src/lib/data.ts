@@ -1,643 +1,505 @@
 /**
  * Single source of truth for all portfolio content.
- * Update copy, links and metrics here — components only render this data.
+ * Only facts supplied by Gaurav live here — no invented metrics, links or results.
+ * Components only render this data.
  */
+
+// gauravgandhi.dev is the homepage set on this repo (github.com/gaurav3611/portfolio).
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gauravgandhi.dev";
 
 export const site = {
   name: "Gaurav Nitesh Gandhi",
   shortName: "Gaurav Gandhi",
-  role: "Software Engineer",
+  role: "Computer Science Undergraduate · Full-Stack Developer",
   email: "gandhigaurav1145@gmail.com",
   phone: "+91 9346663611",
-  location: "India",
-  availability: "Open to internships, full-time roles & freelance work",
-  // TODO: confirm the primary GitHub username and LinkedIn URL
-  github: "https://github.com/gauravgandhi",
-  github2: "https://github.com/gaurav3611",
-  linkedin: "https://www.linkedin.com/in/gauravgandhi",
-  resumeUrl: "/resume.pdf",
-  url: "https://gauravgandhi.dev",
+  phoneHref: "tel:+919346663611",
+  location: "Vellore, India",
+  github: "https://github.com/gaurav3611",
+  linkedin: "https://linkedin.com/in/Gaurav-gandhi",
+  url: siteUrl,
+  description:
+    "Gaurav Nitesh Gandhi — Computer Science undergraduate at VIT Vellore and full-stack developer working across Java/Spring Boot, TypeScript, distributed systems, IoT and machine learning.",
 };
 
-export const hero = {
-  eyebrow: "Software Engineer · M.Tech CS @ VIT",
-  headline: ["Software that holds up", "in the real world."],
-  sub: "I build full-stack products, distributed backends and IoT systems — from ESP32 firmware streaming sensor data over BLE, to Spring Boot services coordinated by ZooKeeper, to the React interfaces that make all of it feel effortless.",
-  roles: [
-    "Frontend Engineer",
-    "Full Stack Developer",
-    "React Specialist",
-    "Distributed Systems Enthusiast",
-    "IoT Developer",
-    "System Designer",
-  ],
-  stats: [
-    { value: 5, suffix: "", label: "Systems designed & shipped" },
-    { value: 25, suffix: "+", label: "Technologies in production use" },
-    { value: 3, suffix: "", label: "Domains: web, IoT, distributed" },
-    { value: 100, suffix: "Hz", label: "Real-time sensor streaming" },
-  ],
+export const chapters = [
+  { id: "cover", num: "00", label: "Cover" },
+  { id: "street", num: "01", label: "Street Level" },
+  { id: "underground", num: "02", label: "Underground" },
+  { id: "player", num: "03", label: "Player 1" },
+  { id: "missions", num: "04", label: "Missions" },
+  { id: "contact", num: "05", label: "Contact" },
+] as const;
+
+export type Side = "front" | "back";
+
+/** The front/back toggle: what people see vs. what makes it run. */
+export const sides = {
+  front: {
+    label: "Front",
+    tag: "Street level",
+    line: "The front is what people touch: React, TypeScript and Three.js interfaces in the browser.",
+    loadout: ["TypeScript", "JavaScript", "React.js", "HTML5", "CSS3", "Three.js", "Web Bluetooth API", "Android Development with Kotlin"],
+  },
+  back: {
+    label: "Back",
+    tag: "Underground",
+    line: "The back is what keeps it running: Java, Spring Boot, databases and distributed storage.",
+    loadout: ["Java", "Spring Boot", "JDBC", "Hibernate ORM", "Node.js", "Express.js", "Flask", "REST APIs", "MySQL", "MongoDB", "Firebase Firestore", "Apache Hadoop HDFS", "Apache ZooKeeper"],
+  },
+} as const;
+
+export const cover = {
+  chapter: "CHAPTER 00 — THE DEVELOPER",
+  headline: ["I build systems.", "I turn ideas into software."],
+  role: "Computer Science Undergraduate | Full-Stack Developer",
 };
 
-export const about = {
-  intro:
-    "I'm Gaurav — an engineer who likes the messy parts of software: the sensor that reports garbage twice a second, the cache that goes stale at the worst moment, the UI that has to stay honest while the network isn't.",
-  story: [
-    "My path into engineering started with hardware, not code. I wanted to know why things worked — so I pulled them apart. The first time I flashed a microcontroller and watched a sensor value show up on a screen I built, the loop closed: software is how you make the physical world programmable. I've been chasing that feeling since.",
-    "That curiosity pushed me across the stack in both directions. Downward — into firmware, BLE protocols, and distributed storage, where I learned that reliability is designed, not hoped for. Upward — into React, motion and interface craft, where I learned that performance and polish are what make people trust a system they can't see.",
-    "Now, as an M.Tech Computer Science student at VIT, I spend my time building production-grade projects end to end: defining the problem, designing the architecture, writing the code, measuring the result. Each project in this portfolio exists because I wanted to understand a system deeply enough to build it myself.",
-  ],
-  philosophy: [
-    {
-      title: "Simple survives",
-      body: "The clever solution impresses in a demo; the simple one survives in production. I optimize for the second.",
-    },
-    {
-      title: "Measure, don't guess",
-      body: "Latency budgets, sampling rates, cache hit ratios — decisions are cheaper when they're backed by numbers.",
-    },
-    {
-      title: "Own the whole stack",
-      body: "Firmware to database to pixels. Knowing every layer means no part of a system is a black box to me.",
-    },
-    {
-      title: "Ship, then sharpen",
-      body: "A working system teaches more than a perfect plan. I get to real users fast, then iterate on evidence.",
-    },
+export const origin = {
+  title: "A developer in progress",
+  lines: [
+    "Computer Science undergraduate at VIT.",
+    "Interested in full-stack development, backend engineering, distributed systems, IoT, and machine learning.",
   ],
 };
-
-export const journey = [
-  {
-    year: "2024",
-    title: "First lines of code",
-    body: "Started later than most — and moved faster for it. C and the terminal first: pointers, memory, and how a program actually reaches the metal.",
-  },
-  {
-    year: "Late 2024",
-    title: "The web clicks",
-    body: "JavaScript, then React, within months. Interfaces turned out to be systems too — state, data flow, and rendering budgets all the way down.",
-  },
-  {
-    year: "2025",
-    title: "Hardware meets software",
-    body: "First ESP32 builds — and the gas & fire monitoring system, shipped and running 24/7 in a real kitchen. My first system where failure had consequences.",
-  },
-  {
-    year: "Late 2025",
-    title: "Trust as an engineering problem",
-    body: "The cancer EHR on IPFS and the Automate Hub workflow engine — decentralized storage, role-based access, idempotent retries. Backend instincts, earned fast.",
-  },
-  {
-    year: "2026",
-    title: "The systems year",
-    body: "Started the M.Tech at VIT, interned as an SDE at fintech company Finfactor, and built the distributed e-commerce platform plus the cricket swing analyzer — firmware to shaders.",
-  },
-  {
-    year: "2028",
-    title: "M.Tech, complete",
-    body: "Expected graduation from VIT — with a portfolio of systems, not just coursework, to show for it.",
-  },
-];
-
-export const skillGroups = [
-  {
-    title: "Languages",
-    icon: "Code2",
-    skills: ["Java", "Python", "JavaScript", "TypeScript", "Kotlin", "C", "SQL"],
-  },
-  {
-    title: "Frontend",
-    icon: "LayoutDashboard",
-    skills: ["React", "Next.js", "HTML", "CSS", "Tailwind CSS", "Three.js", "Framer Motion"],
-  },
-  {
-    title: "Backend",
-    icon: "Server",
-    skills: ["Node.js", "Express", "Spring Boot", "Hibernate", "Flask", "REST", "SOAP", "JWT Auth"],
-  },
-  {
-    title: "Databases",
-    icon: "Database",
-    skills: ["MongoDB", "MySQL", "Firebase", "Redis-style caching", "Schema design"],
-  },
-  {
-    title: "Cloud & Deployment",
-    icon: "Cloud",
-    skills: ["Firebase", "Vercel", "CI-ready builds", "Blynk Cloud", "Serverless functions"],
-  },
-  {
-    title: "IoT & Embedded",
-    icon: "Cpu",
-    skills: ["ESP32", "BLE / GATT", "Web Bluetooth", "MPU6050 IMU", "Sensor fusion", "MQTT"],
-  },
-  {
-    title: "Machine Learning",
-    icon: "BrainCircuit",
-    skills: ["TensorFlow", "Keras", "Model training", "Data preprocessing"],
-  },
-  {
-    title: "Big Data & Distributed",
-    icon: "Network",
-    skills: ["Apache Hadoop", "ZooKeeper", "Apache Ignite", "HDFS", "Fault tolerance"],
-  },
-  {
-    title: "Visualization",
-    icon: "ChartSpline",
-    skills: ["Chart.js", "Power BI", "Three.js scenes", "Real-time dashboards"],
-  },
-  {
-    title: "Tools & Core CS",
-    icon: "Wrench",
-    skills: ["Git", "GitHub", "Android Studio", "DSA", "OS", "DBMS", "Networks", "System Design"],
-  },
-];
-
-export type Project = {
-  id: string;
-  index: string;
-  title: string;
-  tagline: string;
-  flagship?: boolean;
-  year: string;
-  stack: string[];
-  gradient: string; // tailwind gradient classes for the cover
-  cover: "swing" | "distributed" | "health" | "iot" | "automation";
-  metrics: { value: string; label: string }[];
-  problem: string;
-  goal: string;
-  features: string[];
-  process: string[];
-  results: string[];
-  architecture: string[];
-  flow: string[]; // nodes of the architecture diagram, in order
-  challenges: { title: string; body: string }[];
-  lessons: string[];
-  impact: string;
-  future?: string[];
-};
-
-export const projects: Project[] = [
-  {
-    id: "cricket-swing-analyzer",
-    index: "01",
-    title: "IoT Cricket Swing Analyzer",
-    tagline:
-      "A wearable sensor that turns a cricket bat swing into live 3D telemetry in the browser — no app install, no cables.",
-    flagship: true,
-    year: "2026",
-    stack: [
-      "ESP32",
-      "MPU6050",
-      "BLE / GATT",
-      "Web Bluetooth",
-      "Three.js",
-      "React",
-      "Flask",
-      "Firebase",
-    ],
-    gradient: "from-primary via-secondary to-accent",
-    cover: "swing",
-    metrics: [
-      { value: "100Hz", label: "IMU sampling rate" },
-      { value: "<40ms", label: "Sensor-to-screen latency" },
-      { value: "60fps", label: "3D render, mid-range laptops" },
-    ],
-    problem:
-      "Cricket coaching relies on the naked eye. Professional swing-analysis rigs cost lakhs and live in labs; a club player gets feedback like 'swing straighter' with no data behind it. I wanted lab-grade swing telemetry from hardware that costs less than a match ticket — and a zero-install experience, because a coach on a field will never download an SDK.",
-    goal:
-      "Lab-grade swing telemetry for under \u20b91,500 — connect from a browser tab and see your swing in 3D within seconds, no installs, no cables.",
-    features: [
-      "Live 3D bat replica driven by real IMU orientation",
-      "Swing-path ribbon with bat speed & swing-plane metrics",
-      "One-tap BLE pairing straight from the browser",
-      "Session history with replay, persisted in Firebase",
-      "100Hz end-to-end pipeline at <40ms latency",
-    ],
-    process: [
-      "Prototyped sensor fusion on a breadboard with serial plots",
-      "Designed the binary BLE frame layout & negotiated throughput",
-      "Built the Three.js visualization against recorded sessions",
-      "Integrated the live pipeline, then Flask + Firebase persistence",
-    ],
-    results: [
-      "100Hz sustained streaming with no visible frame drops",
-      "<40ms sensor-to-screen latency on mid-range laptops",
-      "A complete swing lab for less than the price of a match ticket",
-    ],
-    architecture: [
-      "An ESP32 with an MPU6050 IMU mounts on the bat handle. Firmware samples accelerometer and gyroscope at 100Hz, runs a complementary filter on-device to fuse orientation, and packs each reading into a compact binary frame.",
-      "Frames stream over a custom BLE GATT characteristic using notifications. The browser connects directly through the Web Bluetooth API — no native app — parses the binary layout with DataView, and pushes quaternions into a ring buffer.",
-      "A React + Three.js front end renders the bat as a 3D model driven by live orientation, traces the swing path as a ribbon, and computes bat speed, swing plane and impact timing from the buffered stream.",
-      "Completed sessions post to a Flask API that validates and enriches the data (peak speed, swing arc, consistency score) and persists to Firebase, so players can replay any swing and track progress across sessions.",
-    ],
-    flow: ["MPU6050 IMU", "ESP32 firmware", "BLE GATT notify", "Web Bluetooth", "Ring buffer", "Three.js scene", "Flask API", "Firebase"],
-    challenges: [
-      {
-        title: "BLE throughput vs. packet loss",
-        body: "Naive one-reading-per-notification flooded the connection and dropped frames. I batched 5 readings per 20-byte-aligned packet and negotiated a shorter connection interval — throughput held at 100Hz with zero visible stutter.",
-      },
-      {
-        title: "Orientation drift",
-        body: "Raw gyro integration drifted within seconds. A complementary filter running on the ESP32 (gyro for fast motion, accelerometer for gravity reference) kept the virtual bat aligned with the real one through full swings.",
-      },
-      {
-        title: "Rendering under pressure",
-        body: "Recomputing the swing ribbon every frame tanked the frame rate. Preallocated buffer geometry and in-place attribute updates got the scene back to a stable 60fps.",
-      },
-    ],
-    lessons: [
-      "Binary protocol design: layout, alignment and versioning of sensor frames matter as much as the transport.",
-      "The browser is a serious real-time platform — Web Bluetooth plus WebGL replaces an entire native app.",
-      "Filtering belongs as close to the sensor as possible; shipping raw noise downstream just moves the problem.",
-    ],
-    impact:
-      "A complete swing lab for under ₹1,500 in parts: connect from a browser tab, swing, and watch your bat move in 3D with speed and swing-plane metrics in real time. It's the project that taught me end-to-end system ownership — from soldering to shaders.",
-    future: [
-      "Impact detection via high-g accelerometer events to isolate ball contact",
-      "ML model over Firebase session data to classify shot types",
-      "Multi-sensor sync for full body + bat kinematics",
-    ],
-  },
-  {
-    id: "distributed-ecommerce",
-    index: "02",
-    title: "Distributed E-commerce Platform",
-    tagline:
-      "A fault-tolerant commerce backend that keeps serving when nodes don't — Spring Boot, Hadoop, ZooKeeper and Ignite.",
-    year: "2026",
-    stack: [
-      "Spring Boot",
-      "React",
-      "Apache Hadoop",
-      "ZooKeeper",
-      "Apache Ignite",
-      "MySQL",
-      "JWT",
-    ],
-    gradient: "from-secondary to-primary",
-    cover: "distributed",
-    metrics: [
-      { value: "~85%", label: "Catalog cache hit ratio" },
-      { value: "3×", label: "Replication factor on HDFS" },
-      { value: "0", label: "Single points of failure in the data path" },
-    ],
-    problem:
-      "Most student e-commerce builds are a monolith with a single database — one crash and the store is gone. I wanted to build commerce the way it actually runs at scale: services that fail independently, storage that survives a dead node, and reads that don't hammer the database on every request.",
-    goal:
-      "Build commerce infrastructure that survives real failures — dead nodes, cache races, duplicate traffic — with no single point of failure in the data path.",
-    features: [
-      "Domain-split Spring Boot services behind one gateway",
-      "ZooKeeper service registry & leader election",
-      "Ignite write-through cache for hot catalog reads",
-      "HDFS-backed assets & analytics with 3\u00d7 replication",
-      "Stateless JWT sessions — any node serves any user",
-    ],
-    process: [
-      "Modeled domains and consistency boundaries before code",
-      "Stood up ZooKeeper coordination and service skeletons",
-      "Layered Ignite caching with per-entity versioned invalidation",
-      "Chaos-tested by killing DataNodes and services mid-request",
-    ],
-    results: [
-      "Node failure: zero data loss, requests keep serving",
-      "~85% cache hit ratio on catalog reads",
-      "Stale-price bugs eliminated via write-through versioning",
-    ],
-    architecture: [
-      "Spring Boot services split by domain — catalog, cart, orders, auth — each owning its data and exposed through REST. A React storefront consumes them through a single gateway.",
-      "ZooKeeper handles coordination: service registration, leader election for scheduled jobs, and shared configuration, so instances can join or die without manual intervention.",
-      "Product images, order archives and clickstream logs live on HDFS with 3× replication — losing a DataNode loses no data. Batch jobs aggregate sales analytics from the same store.",
-      "Apache Ignite sits in front of MySQL as a distributed cache for hot catalog reads, with write-through invalidation so product updates never serve stale prices. Auth is stateless JWT so any instance can serve any user.",
-    ],
-    flow: ["React storefront", "API gateway", "Spring Boot services", "ZooKeeper", "Ignite cache", "MySQL", "HDFS (3× replicas)"],
-    challenges: [
-      {
-        title: "Cache invalidation, for real",
-        body: "Price updates through the admin path initially raced with cached reads. Write-through caching with per-entity versioning closed the gap — a stale price is a correctness bug, not a performance detail.",
-      },
-      {
-        title: "Session state in a stateless world",
-        body: "Sticky sessions would have defeated the point. Moving carts into the Ignite grid keyed by user meant any service instance could pick up any request mid-session.",
-      },
-      {
-        title: "Testing failure on purpose",
-        body: "I killed DataNodes and service instances mid-request to verify the guarantees I was claiming. Watching HDFS re-replicate and ZooKeeper re-elect turned distributed-systems theory into muscle memory.",
-      },
-    ],
-    lessons: [
-      "Fault tolerance is an architecture property, not a library import — you design for the dead node up front.",
-      "Consistency boundaries matter: knowing which reads may be stale (recommendations) and which never can be (prices) shapes the whole cache design.",
-      "Coordination is its own concern; pushing it into ZooKeeper kept every service simpler.",
-    ],
-    impact:
-      "The platform survives a node failure with zero data loss and keeps p95 catalog reads fast off the Ignite grid. It's the project where distributed systems stopped being a course topic and became something I can build and reason about under failure.",
-  },
-  {
-    id: "cancer-ehr-ipfs",
-    index: "03",
-    title: "Cancer EHR on IPFS",
-    tagline:
-      "A decentralized electronic health record system where oncology patients — not hospitals — hold the keys to their data.",
-    year: "2025",
-    stack: ["MongoDB", "Express", "React", "Node.js", "IPFS", "JWT", "Crypto"],
-    gradient: "from-[#f43f5e] to-[#fb923c]",
-    cover: "health",
-    metrics: [
-      { value: "AES-256", label: "Client-side record encryption" },
-      { value: "CID", label: "Content-addressed integrity" },
-      { value: "RBAC", label: "Doctor / patient / admin roles" },
-    ],
-    problem:
-      "Cancer treatment spans years and multiple hospitals — and records get trapped in each one's silo. Patients repeat scans they've already paid for; oncologists make decisions with partial history. Centralized EHRs also make a single database breach catastrophic. The record should follow the patient, tamper-evident, with the patient controlling access.",
-    goal:
-      "Give oncology patients a record that follows them — portable across hospitals, tamper-evident by construction, and shareable strictly on their terms.",
-    features: [
-      "Client-side AES-256 encryption before data leaves the browser",
-      "IPFS content addressing — integrity checks built into storage",
-      "Per-grantee key wrapping for share & revoke",
-      "Separate doctor / patient / admin portals",
-      "Access logging on every record view",
-    ],
-    process: [
-      "Threat-modeled the data flows before writing code",
-      "Built and tested the crypto & key-wrapping layer first",
-      "Wired IPFS storage with chunked uploads and pinning",
-      "Shipped RBAC portals with every route audited",
-    ],
-    results: [
-      "Records verifiable by hash from any hospital",
-      "Sharing revocable without touching stored ciphertext",
-      "Large scans stay responsive via chunked streaming",
-    ],
-    architecture: [
-      "A MERN application fronts the system: React portals for patients and doctors, Express/Node APIs, MongoDB for accounts, permissions and record metadata.",
-      "Medical files never touch the server unencrypted. Records are AES-encrypted client-side, then pushed to IPFS; only the content hash (CID) and encrypted key material are stored in MongoDB.",
-      "Because IPFS addresses content by hash, any tampering changes the CID — integrity verification is built into the storage layer itself rather than bolted on.",
-      "JWT sessions with role-based access control gate every route: patients grant and revoke doctor access per record, doctors see only what's shared with them, and every access is logged.",
-    ],
-    flow: ["Patient portal", "AES-256 encrypt", "IPFS (CID)", "MongoDB metadata", "RBAC / JWT", "Doctor portal"],
-    challenges: [
-      {
-        title: "Key management without a custodian",
-        body: "Encrypting on the client raises the question of who holds keys. Wrapping record keys per-grantee lets a patient share with a specific doctor without ever exposing the master key to the server.",
-      },
-      {
-        title: "IPFS latency for large scans",
-        body: "Multi-hundred-MB imaging files retrieved slowly through public gateways. Chunked uploads, a pinning service and metadata-first rendering kept the portal responsive while payloads streamed.",
-      },
-      {
-        title: "Designing for revocation",
-        body: "Immutable storage can't 'unshare' — so access control had to live in the key layer, not the storage layer. Revocation invalidates the wrapped key, leaving the ciphertext harmless.",
-      },
-    ],
-    lessons: [
-      "Decentralized storage changes where security lives — encryption and key policy become the product.",
-      "Healthcare UX is trust UX: every screen has to make it obvious who can see what, and why.",
-      "Content addressing is a gift: integrity checks you'd normally build, you get for free.",
-    ],
-    impact:
-      "A working model of patient-owned oncology records: portable across hospitals, verifiable by hash, shareable and revocable by the patient. Built end to end — cryptography, storage, APIs and both portals.",
-  },
-  {
-    id: "gas-fire-monitoring",
-    index: "04",
-    title: "Gas & Fire Monitoring System",
-    tagline:
-      "An always-on IoT safety net that detects gas leaks and fire in seconds — and alerts before the smoke does.",
-    year: "2025",
-    stack: ["ESP32", "MQ-2", "Flame sensor", "DHT11", "Blynk", "C/C++"],
-    gradient: "from-warning to-[#ef4444]",
-    cover: "iot",
-    metrics: [
-      { value: "<3s", label: "Leak-to-alert latency" },
-      { value: "24/7", label: "Months of continuous uptime" },
-      { value: "2-tier", label: "Local + cloud alerting" },
-    ],
-    problem:
-      "LPG leaks and kitchen fires kill precisely because detection is slow and alerts don't travel — a beeping unit in an empty house warns no one. Commercial systems with remote alerting are priced for industry, not homes. I wanted detection measured in seconds and alerts that reach a phone anywhere.",
-    goal:
-      "Cut leak-to-alert time to seconds with hardware a household can afford — and a safety path that keeps working when the internet doesn't.",
-    features: [
-      "MQ-2 + flame + DHT11 sensor fusion on an ESP32",
-      "Two-tier alerting: instant local buzzer/relay, cloud push via Blynk",
-      "Remote threshold tuning without reflashing firmware",
-      "Rolling-baseline calibration against sensor drift",
-      "Wi-Fi drop resilience with reconnection backoff",
-    ],
-    process: [
-      "Characterized sensor drift and burn-in on the bench",
-      "Built threshold logic with moving-average smoothing",
-      "Split the safety path (local) from the notification path (cloud)",
-      "Ran it in a real kitchen and tuned false positives to zero",
-    ],
-    results: [
-      "<3s leak-to-alert in every test run",
-      "Months of continuous 24/7 operation",
-      "Zero false alarms after cross-sensor gating",
-    ],
-    architecture: [
-      "An ESP32 polls an MQ-2 gas sensor, an IR flame sensor and a DHT11 temperature/humidity sensor on a tight loop, with calibrated thresholds and moving-average smoothing to reject transient spikes.",
-      "Alerting is two-tier by design: a local buzzer and relay cutoff fire instantly with no network dependency, while the Blynk cloud pushes notifications to phones over Wi-Fi.",
-      "The Blynk dashboard exposes live readings, historical charts and remote threshold tuning, so sensitivity can be adjusted without reflashing firmware.",
-      "The firmware handles Wi-Fi drops with reconnection backoff and keeps local protection active offline — the safety path never depends on the cloud.",
-    ],
-    flow: ["MQ-2 / Flame / DHT11", "ESP32 loop", "Threshold logic", "Local buzzer + relay", "Blynk Cloud", "Phone alerts"],
-    challenges: [
-      {
-        title: "Sensors that lie",
-        body: "The MQ-2 drifts with humidity and needs a burn-in period. Warm-up gating plus a rolling baseline turned a noisy analog signal into a trustworthy one — my first real lesson in never trusting raw sensor data.",
-      },
-      {
-        title: "False alarms erode trust",
-        body: "A steamy kitchen shouldn't page your phone. Cross-checking gas readings against temperature and requiring sustained threshold breaches cut false positives to effectively zero without slowing true detection.",
-      },
-      {
-        title: "Designing for offline",
-        body: "The first version alerted only via cloud — useless in a power-cut-prone network. Splitting the safety path (local, instant) from the notification path (cloud, best-effort) fixed the design, not just the bug.",
-      },
-    ],
-    lessons: [
-      "Safety systems are designed around their failure modes, not their happy path.",
-      "Calibration and signal conditioning are half the work in any sensor project.",
-      "Latency budgets are user experience: three seconds feels instant; thirty is a disaster.",
-    ],
-    impact:
-      "Ran continuously for months in a real kitchen, catching test leaks in under three seconds every time. My first system with real-world stakes — and the project that set my bar for reliability.",
-  },
-  {
-    id: "automate-hub",
-    index: "05",
-    title: "Automate Hub",
-    tagline:
-      "A self-hosted automation platform that chains triggers to actions — webhooks in, workflows out, retries built in.",
-    year: "2025",
-    stack: ["Node.js", "Express", "React", "MongoDB", "REST", "Webhooks"],
-    gradient: "from-[#14b8a6] to-accent",
-    cover: "automation",
-    metrics: [
-      { value: "idempotent", label: "Safe retries by design" },
-      { value: "3", label: "Trigger types: webhook, cron, manual" },
-      { value: "full", label: "Run history with per-step logs" },
-    ],
-    problem:
-      "Small teams stitch tools together by hand — copy this form response there, ping that channel, update the sheet. SaaS automation gets expensive fast and hides your data in someone else's cloud. I wanted a self-hosted hub where a workflow is data: define a trigger, chain actions, and let the engine handle execution, retries and logging.",
-    goal:
-      "Make automation trustworthy enough to leave on: workflows as data, retries that never double-fire, and failures you can actually debug.",
-    features: [
-      "Webhook, cron and manual triggers",
-      "Idempotent step contracts with deduplication keys",
-      "Exponential-backoff retries per step",
-      "Full run timelines with per-step input/output logs",
-      "One-click replay from the failed step",
-    ],
-    process: [
-      "Designed the workflow / run / step schema first",
-      "Built the execution engine around at-least-once delivery",
-      "Added observability: run timelines and step-level logs",
-      "Hardened against duplicate webhooks and mid-step failures",
-    ],
-    results: [
-      "Duplicate webhooks never double-post — verified by test",
-      "Failed runs debuggable from the dashboard alone",
-      "Run history stays fast via summarized documents",
-    ],
-    architecture: [
-      "An Express/Node core exposes a REST API and a webhook ingress; workflows, runs and credentials live in MongoDB with a schema designed for querying run history efficiently.",
-      "The execution engine treats each workflow as a directed chain of steps. Every run gets an ID; every step records input, output, duration and status — so a failed run is a debuggable artifact, not a mystery.",
-      "Failed steps retry with exponential backoff, and each step is idempotent by contract (deduplication keys on side effects), so a retry never double-posts or double-writes.",
-      "A React dashboard handles the human side: building workflows, inspecting run timelines, and replaying failed runs after fixing the cause.",
-    ],
-    flow: ["Webhook / Cron trigger", "Ingress + validation", "Execution engine", "Step chain", "Retry + backoff", "MongoDB run log", "React dashboard"],
-    challenges: [
-      {
-        title: "Exactly-once is a lie",
-        body: "Webhooks arrive twice; networks fail mid-step. Instead of chasing exactly-once delivery, I made every action idempotent and deduplicated on delivery IDs — at-least-once plus idempotency equals correct.",
-      },
-      {
-        title: "Run history at scale",
-        body: "Logging every step verbosely bloated the collection fast. Capped detail retention plus summarized run documents kept dashboards snappy without losing the audit trail.",
-      },
-      {
-        title: "Failure UX",
-        body: "The dashboard's hardest feature was honesty: showing exactly which step failed, with what input, and offering one-click replay from that step — because automation people don't trust is automation people turn off.",
-      },
-    ],
-    lessons: [
-      "Distributed-systems thinking applies at every scale — even a single-node engine needs idempotency and backoff.",
-      "Observability is a feature: run logs that explain failures are why users keep automation on.",
-      "Schema design for time-series-ish data (runs, steps) decides whether your dashboard is fast or unusable.",
-    ],
-    impact:
-      "A working automation engine that runs real workflows reliably: webhook to action in milliseconds, failures retried and logged, everything self-hosted. It sharpened the backend instincts — idempotency, retries, observability — that the distributed e-commerce platform later built on.",
-  },
-];
-
-export const techStack = [
-  // row 1
-  ["React", "Next.js", "TypeScript", "JavaScript", "Node.js", "Express", "Java", "Spring Boot", "Hibernate", "Flask", "Python", "Kotlin", "Android", "HTML", "CSS"],
-  // row 2
-  ["MongoDB", "MySQL", "Firebase", "Apache Hadoop", "ZooKeeper", "Apache Ignite", "Three.js", "Chart.js", "TensorFlow", "Keras", "Power BI", "Git", "GitHub", "Vercel", "REST", "SOAP"],
-];
-
-export const experience = [
-  {
-    period: "2026 · 2 months",
-    title: "SDE Intern",
-    org: "Finfactor · Fintech",
-    points: [
-      "Built and shipped backend features on production fintech services — REST APIs, data validation and third-party integrations — through real code review, testing and release processes.",
-      "Worked alongside senior engineers on data-heavy financial workflows, picking up production habits that now show in every project: observability, defensive input handling and safe rollouts.",
-    ],
-  },
-  {
-    period: "2025 — Present",
-    title: "Graduate Engineer & Researcher",
-    org: "VIT · M.Tech Computer Science",
-    points: [
-      "Designing and building distributed-systems projects — service coordination with ZooKeeper, distributed storage on HDFS, and cache architectures with Apache Ignite.",
-      "Studying advanced systems coursework while shipping production-grade side projects that apply it the same semester.",
-    ],
-  },
-  {
-    period: "2024 — 2026",
-    title: "End-to-End Project Lead",
-    org: "Independent / Academic Projects",
-    points: [
-      "Led the full lifecycle of five substantial systems — requirements, architecture, implementation, deployment and iteration — across web, IoT and distributed domains.",
-      "Owned every layer personally: firmware in C/C++, backend services in Java/Node/Python, and React front ends with real-time 3D visualization.",
-    ],
-  },
-  {
-    period: "2024 — Present",
-    title: "Hackathons & Collaboration",
-    org: "Team Builds",
-    points: [
-      "Built under 24–36 hour constraints in team hackathons — scoping ruthlessly, dividing interfaces cleanly, and integrating under deadline pressure.",
-      "Regularly the bridge between hardware and web teammates: comfortable owning the protocol layer where the two worlds meet.",
-    ],
-  },
-  {
-    period: "Ongoing",
-    title: "Freelance & Open Source",
-    org: "Available",
-    points: [
-      "Taking on freelance full-stack and IoT builds — the same end-to-end ownership, applied to client problems.",
-      "Preparing open-source releases of the swing-analyzer BLE protocol layer and the automation engine core.",
-    ],
-  },
-];
 
 export const education = [
   {
-    period: "2026 — 2028 (expected)",
-    degree: "Master of Technology, Computer Science",
+    id: "vit",
+    step: "01-A",
     school: "Vellore Institute of Technology",
-    detail:
-      "CGPA 7.51 · Focus: distributed systems, advanced databases, machine learning. Coursework applied directly into shipped projects each semester.",
-    current: true,
+    place: "Vellore, India",
+    degree: "Integrated M.Tech in Computer Science",
+    date: "Expected May 2028",
+    score: "CGPA 7.51",
+    coursework: [
+      "Artificial Intelligence",
+      "Server Side Programming",
+      "Data Structures and Algorithms",
+      "Object-Oriented Programming in Java",
+      "Machine Learning",
+      "Python",
+      "Software Engineering",
+    ],
   },
   {
-    period: "Foundation",
-    degree: "Computer Science & Engineering fundamentals",
-    school: "Undergraduate studies",
-    detail:
-      "Data structures & algorithms, operating systems, DBMS, computer networks — the core CS that every project here stands on.",
-    current: false,
+    id: "pu",
+    step: "01-B",
+    school: "Pupil Tree PU College",
+    place: "Bellary, Karnataka",
+    degree: "Pre-University Course",
+    date: "May 2023",
+    score: "93.33%",
+    coursework: [] as string[],
   },
 ];
 
-export const achievements = {
-  counters: [
-    { value: 5, suffix: "", label: "End-to-end systems shipped" },
-    { value: 8, suffix: "", label: "Hardware + software integrations" },
-    { value: 1000, suffix: "+", label: "Commits across active repos" },
-    { value: 2, suffix: "+", label: "Years building, non-stop" },
+export const experience = {
+  chapter: "CHAPTER 02 — FIELD EXPERIENCE",
+  role: "Software Developer Intern",
+  company: "FinFactor",
+  date: "May 2025 – June 2025",
+  context: "Fintech environment",
+  points: [
+    "Java and Spring Boot backend development.",
+    "TypeScript frontend features.",
+    "Full-stack team collaboration.",
+    "Debugging, software development, and application maintenance.",
   ],
-  cards: [
-    {
-      icon: "GitBranch",
-      title: "GitHub Activity",
-      body: "Consistent, project-driven contribution history — firmware, backends and front ends across active repositories.",
-      link: true,
-    },
-    {
-      icon: "Trophy",
-      title: "Hackathon Builds",
-      body: "Multiple team hackathon entries shipped under 24–36 hour constraints, owning integration and the hardware/web boundary.",
-      link: false,
-    },
-    {
-      icon: "BookOpenCheck",
-      title: "Certifications",
-      body: "Currently pursuing cloud and distributed-systems certifications — this space is reserved for them.",
-      link: false,
-    },
-    {
-      icon: "Rocket",
-      title: "Open Source (incoming)",
-      body: "Extracting the BLE streaming layer and automation engine into standalone open-source packages.",
-      link: false,
-    },
+  detail: [
+    "Worked as a Software Developer Intern in a fintech environment.",
+    "Developed backend components using Java and Spring Boot.",
+    "Built and maintained frontend features using TypeScript.",
+    "Collaborated with the development team to build and improve full-stack web applications.",
+    "Gained practical experience in software development, debugging, and application maintenance.",
   ],
 };
+
+export type ArchNode = {
+  id: string;
+  label: string;
+  sub?: string;
+  purpose: string;
+  /** Position as % of the diagram box: [x, y] for wide and tall layouts. */
+  wide: [number, number];
+  tall: [number, number];
+};
+
+export type Architecture = {
+  nodes: ArchNode[];
+  edges: [string, string, string?][];
+  /** Node ids traced by the "Trace a request" demo. */
+  trace: string[];
+};
+
+export type Project = {
+  slug: string;
+  index: string;
+  name: string;
+  tagline: string;
+  tech: string[];
+  highlights: string[];
+  goal: string;
+  points: string[];
+  alt: string;
+  architecture: Architecture;
+  flagship?: boolean;
+  note?: string;
+  /** Only URLs that were checked and load publicly. Omit when nothing is public. */
+  links?: ProjectLink[];
+  /** Separate deliverables of a multi-part build, each with its own honest status. */
+  parts?: ProjectPart[];
+  /** Slug of the earlier build this one rewrites. */
+  evolvedFrom?: string;
+};
+
+export type ProjectPart = {
+  kind: "web" | "api" | "mobile" | "hardware";
+  name: string;
+  stack: string[];
+  does: string;
+  status: string;
+  url?: string;
+};
+
+export type ProjectLink = { kind: "repo" | "demo" | "download"; label: string; url: string };
+
+export const projects: Project[] = [
+  {
+    slug: "iot-cricket-swing-analyzer",
+    index: "03-A",
+    name: "IoT Cricket Swing Analyzer",
+    tagline: "End-to-end IoT motion analytics",
+    tech: ["ESP32", "MPU6050", "BLE 4.2", "Web Bluetooth API", "Three.js", "Firebase", "Flask"],
+    highlights: ["Motion capture at 50 Hz.", "Live browser streaming via Web Bluetooth API.", "Interactive 3D swing visualization.", "Flask backend and Firebase services."],
+    goal: "Capture how a cricket bat moves during a swing and make that motion visible and storable from an ordinary browser.",
+    points: [
+      "Built an end-to-end IoT analytics platform using ESP32 and MPU6050 IMU sensors.",
+      "Captured bat motion at 50 Hz using Bluetooth Low Energy 4.2.",
+      "Integrated the Web Bluetooth API for live browser streaming.",
+      "Developed an interactive 3D swing visualization using Three.js.",
+      "Used Firebase Firestore for cloud storage, Firebase Authentication for user access, and Flask as the backend service.",
+    ],
+    alt: "Monochrome technical illustration of a cricket bat with a sensor module, directional swing arcs, and a companion architecture diagram showing ESP32, MPU6050, Bluetooth streaming, a browser-based 3D visualization, Flask, and Firebase.",
+    flagship: true,
+    links: [
+      { kind: "demo", label: "Live demo", url: "https://cricket-six-nu.vercel.app" },
+      { kind: "repo", label: "Repository", url: "https://github.com/gaurav3611/Cricket" },
+    ],
+    architecture: {
+      nodes: [
+        { id: "imu", label: "MPU6050", sub: "IMU on the bat", purpose: "The inertial sensor mounted on the bat that measures its motion.", wide: [9, 28], tall: [25, 8] },
+        { id: "esp", label: "ESP32", sub: "50 Hz capture", purpose: "Reads the IMU and sends motion samples at 50 Hz.", wide: [30, 28], tall: [75, 8] },
+        { id: "ble", label: "BLE 4.2", sub: "Wireless link", purpose: "Bluetooth Low Energy link carrying samples from the ESP32 to the browser.", wide: [51, 28], tall: [75, 32] },
+        { id: "browser", label: "Browser", sub: "Web Bluetooth API", purpose: "Receives the live stream directly in the browser through the Web Bluetooth API.", wide: [72, 28], tall: [25, 32] },
+        { id: "three", label: "Three.js view", sub: "3D swing", purpose: "Renders the swing as an interactive 3D visualization.", wide: [91, 28], tall: [25, 56] },
+        { id: "flask", label: "Flask", sub: "Backend service", purpose: "The backend service used by the web app.", wide: [72, 76], tall: [75, 56] },
+        { id: "firebase", label: "Firebase", sub: "Auth + Firestore", purpose: "Firebase Authentication for user access and Firestore for cloud storage.", wide: [91, 76], tall: [50, 84] },
+      ],
+      edges: [
+        ["imu", "esp", "I2C"],
+        ["esp", "ble"],
+        ["ble", "browser"],
+        ["browser", "three"],
+        ["browser", "flask"],
+        ["flask", "firebase"],
+        ["browser", "firebase"],
+      ],
+      trace: ["imu", "esp", "ble", "browser", "three"],
+    },
+  },
+  {
+    slug: "sswingg-platform",
+    index: "03-B",
+    name: "SSwinGG Platform",
+    tagline: "Cricket swing analytics across web, API, Android and hardware (v0.2)",
+    tech: ["Angular 21", "TypeScript", "Spring Boot 4.1", "Java 21", "Flutter", "Firebase", "ESP32-C3", "BMI160", "Chart.js", "three.js"],
+    highlights: [
+      "Angular 21 rewrite of the swing dashboard.",
+      "Spring Boot REST API rewrite of the Flask backend.",
+      "Flutter Android recorder with auto-record and CSV export.",
+      "ESP32-C3 + BMI160 bat sensor with a nine-stage build guide.",
+    ],
+    goal: "Rebuild the cricket swing analyzer as separate, tested pieces: a web app, a Java API, an Android recorder and a documented bat sensor.",
+    points: [
+      "Rewrote the HTML/JavaScript dashboard as an Angular 21 single-page app with standalone components and signals, Chart.js charts and the original three.js bat scene.",
+      "Rewrote the Flask backend as a Spring Boot 4.1 REST API on Java 21 with the same paths, JSON fields and status codes, using the Firebase Admin SDK for ID tokens and Firestore.",
+      "Built a Flutter Android app that connects to the bat over Bluetooth, records shots between Start and Stop or automatically, shows the dashboard's shot metrics and saves each shot as a CSV file.",
+      "Documented the bat sensor (ESP32-C3 Super Mini, BMI160, LiPo cell, TP4056 charger) as a stage-by-stage build guide with circuit diagrams and firmware.",
+      "The app's shot type is a first guess from fixed rules, not a trained classifier, until labelled recordings exist.",
+    ],
+    alt: "Monochrome manga panel of a cricket bat with a small sensor board, a phone showing a speed chart and a browser window, joined by Bluetooth arcs.",
+    note: "Status from the repositories: the web app and API build, pass their tests and run locally but are not deployed; the sensor firmware compiles and was tested against a simulated sensor, not yet on real hardware.",
+    links: [
+      { kind: "repo", label: "Web app", url: "https://github.com/gaurav3611/Cric-Pro-FE" },
+      { kind: "repo", label: "API", url: "https://github.com/gaurav3611/java-cricket-backend" },
+      { kind: "repo", label: "Android app", url: "https://github.com/gaurav3611/mobile_app_swing" },
+      { kind: "repo", label: "Hardware", url: "https://github.com/gaurav3611/Cric-Pro-Hardware" },
+      { kind: "download", label: "Android APK", url: "https://github.com/gaurav3611/mobile_app_swing/releases/latest" },
+    ],
+    evolvedFrom: "iot-cricket-swing-analyzer",
+    parts: [
+      {
+        kind: "web",
+        name: "Web app",
+        stack: ["Angular 21", "TypeScript", "Chart.js", "three.js", "Firebase Auth"],
+        does: "The swing dashboard as an Angular single-page app: live charts, shot history and the 3D bat scene.",
+        status: "Builds, tests pass, runs locally. Not deployed.",
+        url: "https://github.com/gaurav3611/Cric-Pro-FE",
+      },
+      {
+        kind: "api",
+        name: "API",
+        stack: ["Spring Boot 4.1", "Java 21", "Firebase Admin SDK"],
+        does: "REST API with the same paths, JSON fields and status codes as the original Flask backend, backed by Firestore.",
+        status: "Builds, tests pass, runs locally. Not deployed.",
+        url: "https://github.com/gaurav3611/java-cricket-backend",
+      },
+      {
+        kind: "mobile",
+        name: "Android app",
+        stack: ["Flutter", "Bluetooth LE"],
+        does: "Connects to the bat, records shots manually or automatically, shows shot metrics and exports each shot as CSV.",
+        status: "v0.2.0 APK published on GitHub Releases.",
+        url: "https://github.com/gaurav3611/mobile_app_swing",
+      },
+      {
+        kind: "hardware",
+        name: "Bat sensor",
+        stack: ["ESP32-C3", "BMI160", "LiPo + TP4056"],
+        does: "The sensor on the bat, documented as a stage-by-stage build guide with circuit diagrams and firmware.",
+        status: "Firmware compiles and was tested against a simulated sensor; not yet run on real hardware.",
+        url: "https://github.com/gaurav3611/Cric-Pro-Hardware",
+      },
+    ],
+    architecture: {
+      nodes: [
+        { id: "imu", label: "BMI160", sub: "Motion sensor", purpose: "Measures acceleration and rotation on three axes each.", wide: [9, 28], tall: [25, 8] },
+        { id: "esp", label: "ESP32-C3", sub: "Bat firmware", purpose: "Reads the sensor on the bat and advertises the SSwinGG Bluetooth service.", wide: [30, 28], tall: [75, 8] },
+        { id: "ble", label: "Bluetooth LE", sub: "Wireless link", purpose: "Carries live readings from the bat to the phone or the browser.", wide: [51, 28], tall: [75, 32] },
+        { id: "app", label: "Flutter app", sub: "Android recorder", purpose: "Records shots, shows the shot metrics and saves every reading as a CSV file.", wide: [51, 76], tall: [25, 32] },
+        { id: "web", label: "Angular app", sub: "Dashboard", purpose: "The web dashboard with charts and the three.js bat scene.", wide: [72, 28], tall: [25, 56] },
+        { id: "api", label: "Spring Boot API", sub: "Java 21", purpose: "REST API with the same contract as the original Flask backend.", wide: [91, 28], tall: [75, 56] },
+        { id: "fb", label: "Firebase", sub: "Auth + Firestore", purpose: "Sign-in and cloud storage, used through the Firebase Admin SDK.", wide: [91, 76], tall: [50, 84] },
+      ],
+      edges: [["imu", "esp", "I2C"], ["esp", "ble"], ["ble", "app"], ["ble", "web"], ["web", "api"], ["api", "fb"]],
+      trace: ["imu", "esp", "ble", "web", "api", "fb"],
+    },
+  },
+  {
+    slug: "trace-edge-routing",
+    index: "03-C",
+    name: "TRACE",
+    tagline: "Trust-constrained, category-aware routing for edge AI inference (research)",
+    tech: ["Python", "NumPy", "pandas", "SciPy", "Matplotlib", "LaTeX"],
+    highlights: ["Event-driven simulator of edge servers.", "Compares routing policies, from round-robin to TRACE.", "Experiment and analysis pipeline behind a paper draft."],
+    goal: "Study how AI inference requests should be routed between edge servers when trust domains and request categories matter.",
+    points: [
+      "Built an event-driven simulator with configurable topologies, load levels and state-sync periods.",
+      "Implemented and compared routing policies: local only, round-robin variants, EPARA-style capacity-proportional offloading, trust-filtered and energy-aware variants, and TRACE (a trust filter plus best-fit clearance).",
+      "Wrote a resumable experiment runner (about 1,400 runs) and an analysis script that produces the paper's figures, tables and statistics.",
+      "Wrote the paper draft in LaTeX, built with Tectonic.",
+    ],
+    alt: "Monochrome manga diagram of edge server nodes inside dashed trust boundaries, with request arrows routed between them and one sent to a cloud.",
+    note: "A research prototype and paper draft. No results are claimed on this page.",
+    links: [{ kind: "repo", label: "Repository", url: "https://github.com/gaurav3611/edge-cloud-ai-routing" }],
+    architecture: {
+      nodes: [
+        { id: "topo", label: "Topology", sub: "Edge servers", purpose: "Builds a network of edge servers for each experiment.", wide: [10, 30], tall: [25, 10] },
+        { id: "pol", label: "Policies", sub: "Routing rules", purpose: "The routing policies being compared, from local-only to TRACE.", wide: [10, 74], tall: [75, 10] },
+        { id: "sim", label: "Simulator", sub: "Event-driven", purpose: "Runs requests through the topology under a chosen policy and load.", wide: [36, 52], tall: [50, 35] },
+        { id: "exp", label: "Experiments", sub: "~1,400 runs", purpose: "Resumable batch of runs across configurations.", wide: [62, 52], tall: [50, 58] },
+        { id: "ana", label: "Analysis", sub: "Figures + tables", purpose: "Turns run logs into the paper's figures, tables and statistics.", wide: [88, 30], tall: [25, 84] },
+        { id: "paper", label: "Paper", sub: "LaTeX draft", purpose: "The paper draft built from the analysis output.", wide: [88, 74], tall: [75, 84] },
+      ],
+      edges: [["topo", "sim"], ["pol", "sim"], ["sim", "exp"], ["exp", "ana"], ["ana", "paper"]],
+      trace: ["topo", "sim", "exp", "ana", "paper"],
+    },
+  },
+  {
+    slug: "minimal-launcher",
+    index: "03-D",
+    name: "MINIMAL",
+    tagline: "A quiet, monochrome Android home screen",
+    tech: ["Kotlin", "Jetpack Compose", "Android", "DataStore"],
+    highlights: ["Launcher with essential apps and local search.", "Pause before distracting apps.", "Five editable focus profiles."],
+    goal: "A home screen that shows what matters, helps you do one thing, and gets out of the way: no account, no network permission, no analytics.",
+    points: [
+      "Native Kotlin and Jetpack Compose launcher with a clock, chosen essential apps, an app list with ranked local search, and hidden apps.",
+      "A countdown pause before opening apps marked as distracting.",
+      "Five editable focus profiles, each with its own apps, friction, theme, clock and widgets.",
+      "Built-in widgets plus hosted third-party widgets, with Retro Dark and Retro Paper themes.",
+      "22 JVM unit tests and 8 instrumented Compose tests, verified on an Android 16 emulator.",
+    ],
+    alt: "Monochrome manga panel of a phone showing a large clock and a short text list of apps, with an hourglass pause symbol beside it.",
+    note: "Verified on the Android emulator, not yet on a physical phone. Not published, so no repository link is shown.",
+    architecture: {
+      nodes: [
+        { id: "home", label: "Home screen", sub: "Clock + essentials", purpose: "The launcher screen with the clock and chosen apps.", wide: [12, 50], tall: [50, 8] },
+        { id: "pause", label: "Pause", sub: "Launch friction", purpose: "A countdown before opening apps marked as distracting.", wide: [38, 26], tall: [25, 36] },
+        { id: "profiles", label: "Focus profiles", sub: "Five, editable", purpose: "Per-profile apps, friction, theme, clock and widgets.", wide: [38, 74], tall: [75, 36] },
+        { id: "store", label: "DataStore", sub: "On-device only", purpose: "Keeps settings on the phone; the app has no network permission.", wide: [70, 50], tall: [50, 64] },
+        { id: "apps", label: "Android apps", sub: "Launched", purpose: "The apps MINIMAL opens after any pause.", wide: [92, 50], tall: [50, 90] },
+      ],
+      edges: [["home", "pause"], ["home", "profiles"], ["profiles", "store"], ["pause", "apps"]],
+      trace: ["home", "pause", "apps"],
+    },
+  },
+  {
+    slug: "distributed-ecommerce",
+    index: "03-E",
+    name: "Distributed E-Commerce Platform",
+    tagline: "Microservices-ready commerce on distributed storage",
+    tech: ["Spring Boot", "React", "Hadoop HDFS", "ZooKeeper", "JWT"],
+    highlights: ["Distributed storage.", "Service coordination.", "JWT authentication.", "Microservices-ready architecture."],
+    goal: "Build a commerce platform designed for scalability, fault tolerance, and system reliability.",
+    points: [
+      "Developed a distributed e-commerce platform using Spring Boot and React.",
+      "Integrated Apache Hadoop HDFS for scalable distributed storage.",
+      "Utilized Apache ZooKeeper for distributed coordination and service management.",
+      "Implemented a microservices-ready architecture with JWT authentication.",
+      "Focused on scalability, fault tolerance, and system reliability.",
+    ],
+    alt: "Monochrome system architecture illustration showing a React storefront connected to Spring Boot services, Hadoop HDFS storage, ZooKeeper coordination, and JWT authentication.",
+    links: [{ kind: "repo", label: "Repository", url: "https://github.com/gaurav3611/DistributedEcommerce" }],
+    architecture: {
+      nodes: [
+        { id: "store", label: "React storefront", sub: "UI", purpose: "The customer-facing storefront built in React.", wide: [10, 55], tall: [50, 8] },
+        { id: "jwt", label: "JWT auth", sub: "Token check", purpose: "JSON Web Tokens authenticate requests between the storefront and services.", wide: [31, 55], tall: [50, 29] },
+        { id: "svc", label: "Spring Boot services", sub: "Microservices-ready", purpose: "Backend services built with Spring Boot, structured so they can be split into microservices.", wide: [55, 55], tall: [50, 52] },
+        { id: "zk", label: "ZooKeeper", sub: "Coordination", purpose: "Apache ZooKeeper coordinates and manages the service instances.", wide: [55, 14], tall: [26, 72] },
+        { id: "hdfs", label: "Hadoop HDFS", sub: "Distributed storage", purpose: "Apache Hadoop HDFS provides scalable distributed storage.", wide: [86, 55], tall: [72, 90] },
+      ],
+      edges: [["store", "jwt"], ["jwt", "svc"], ["svc", "hdfs"], ["zk", "svc", "coord"]],
+      trace: ["store", "jwt", "svc", "hdfs"],
+    },
+  },
+  {
+    slug: "ipfs-health-records",
+    index: "03-F",
+    name: "Decentralized Health Records",
+    tagline: "IPFS-Based Cancer Electronic Health Record System",
+    tech: ["MERN Stack", "IPFS"],
+    highlights: ["Distributed record storage and CRUD functionality.", "Backend and database integration.", "Focus on data integrity and accessibility."],
+    goal: "Store electronic health records in a decentralized way while keeping the application usable through a familiar MERN interface.",
+    points: [
+      "Developed a decentralized electronic health record system using the MERN stack.",
+      "Integrated IPFS for distributed storage of patient records.",
+      "Implemented CRUD functionality with backend and database integration.",
+      "Focused on data integrity and accessibility through decentralized storage architecture.",
+    ],
+    alt: "Original monochrome technical illustration of a generic medical document connected to an application and a network of distributed IPFS storage nodes. No real patient data is shown.",
+    note: "Illustrations use a generic document only — no real patient data. Distributed storage supports integrity and availability; it does not by itself guarantee confidentiality or regulatory compliance.",
+    links: [{ kind: "repo", label: "Repository", url: "https://github.com/gaurav3611/EhrForCancerPatients" }],
+    architecture: {
+      nodes: [
+        { id: "client", label: "React client", sub: "Record screens", purpose: "The interface for creating, viewing, updating and deleting records.", wide: [12, 50], tall: [50, 10] },
+        { id: "api", label: "Express + Node", sub: "Backend API", purpose: "The backend that handles CRUD requests and coordinates the database and IPFS.", wide: [40, 50], tall: [50, 38] },
+        { id: "mongo", label: "MongoDB", sub: "App database", purpose: "The application database integrated with the backend.", wide: [72, 22], tall: [25, 72] },
+        { id: "ipfs", label: "IPFS network", sub: "Distributed storage", purpose: "Distributed, content-addressed storage for patient record files.", wide: [72, 78], tall: [75, 72] },
+      ],
+      edges: [["client", "api"], ["api", "mongo"], ["api", "ipfs", "files"]],
+      trace: ["client", "api", "ipfs"],
+    },
+  },
+  {
+    slug: "automate-hub",
+    index: "03-G",
+    name: "Automate Hub",
+    tagline: "Order Management System",
+    tech: ["Java", "JDBC", "MySQL"],
+    highlights: ["Backend-driven order processing, database CRUD operations, and modular business logic."],
+    goal: "Process orders reliably through a backend that owns the business rules and talks to a relational database.",
+    points: [
+      "Developed a backend-driven order management system.",
+      "Implemented database connectivity and CRUD operations for order processing.",
+      "Designed modular server-side business logic to improve maintainability and scalability.",
+    ],
+    alt: "Monochrome technical illustration of an order-management workflow connecting a Java backend through JDBC to a MySQL database, with order-processing panels in the foreground.",
+    architecture: {
+      nodes: [
+        { id: "ui", label: "Order panel", sub: "Create · Read · Update · Delete", purpose: "Where order operations start: each action maps to one CRUD operation on an order.", wide: [12, 50], tall: [50, 10] },
+        { id: "logic", label: "Business logic", sub: "Java modules", purpose: "Modular server-side Java code that validates and processes orders, kept separate from data access for maintainability.", wide: [38, 50], tall: [50, 37] },
+        { id: "jdbc", label: "JDBC", sub: "Connectivity", purpose: "The Java Database Connectivity layer that opens connections and runs SQL against the database.", wide: [63, 50], tall: [50, 63] },
+        { id: "db", label: "MySQL", sub: "Orders data", purpose: "Relational storage for order records.", wide: [88, 50], tall: [50, 90] },
+      ],
+      edges: [["ui", "logic"], ["logic", "jdbc"], ["jdbc", "db", "SQL"]],
+      trace: ["ui", "logic", "jdbc", "db"],
+    },
+  },
+];
+
+export const skills = [
+  { id: "languages", title: "Languages", items: ["Java", "TypeScript", "JavaScript", "Python", "SQL", "Kotlin"] },
+  { id: "web", title: "Web Development", items: ["HTML5", "CSS3", "React.js", "Node.js", "Express.js", "Spring Boot", "REST APIs", "JDBC", "Hibernate ORM", "Flask", "Flask-SocketIO"] },
+  { id: "databases", title: "Databases", items: ["MySQL", "MongoDB", "Firebase Firestore"] },
+  { id: "distributed", title: "Distributed Systems", items: ["Apache Hadoop HDFS", "Apache ZooKeeper", "Apache Ignite"] },
+  { id: "iot", title: "IoT and Embedded Systems", items: ["ESP32", "MPU6050 IMU", "BLE 4.2", "Web Bluetooth API", "Blynk IoT Platform", "I2C", "UART", "SPI"] },
+  { id: "ml", title: "Machine Learning", items: ["Scikit-learn", "TensorFlow", "Keras", "Pandas", "NumPy", "Matplotlib", "Seaborn", "Regression", "Classification", "Clustering"] },
+  { id: "dataviz", title: "Data Visualization", items: ["Power BI", "Google Looker Studio", "R", "ggplot2", "Plotly"] },
+  { id: "mobile", title: "Mobile Development", items: ["Android Development with Kotlin", "Android Studio"] },
+  { id: "tools", title: "Development Tools", items: ["Git", "GitHub", "Postman", "Vercel"] },
+  { id: "core", title: "Core Computer Science", items: ["Data Structures and Algorithms", "Object-Oriented Programming", "DBMS", "Operating Systems", "Computer Networks", "Software Engineering"] },
+] as const;
+
+export type SkillId = (typeof skills)[number]["id"];
+
+export const player = {
+  status: "Integrated M.Tech at VIT Vellore · Expected May 2028",
+  stats: [
+    { value: String(projects.length), label: "Builds in the archive" },
+    { value: "1", label: "Internship (FinFactor)" },
+    { value: "7.51", label: "CGPA at VIT" },
+    { value: "93.33%", label: "Pre-University Course" },
+  ],
+};
+
+export type Mission = {
+  id: string;
+  name: string;
+  brief: string;
+  loadout: string[];
+  /** Project slugs from the archive that used this kind of work. */
+  builds: string[];
+  experience?: boolean;
+};
+
+export const missions: Mission[] = [
+  {
+    id: "fullstack",
+    name: "Full-stack web apps",
+    brief: "A complete web application: interface, API and database, built by one person who can move across the stack.",
+    loadout: ["React.js", "TypeScript", "Node.js", "Express.js", "Spring Boot", "MongoDB", "MySQL"],
+    builds: ["ipfs-health-records", "distributed-ecommerce"],
+    experience: true,
+  },
+  {
+    id: "backend",
+    name: "Backend & APIs",
+    brief: "Server-side services, REST APIs and data layers with clear, modular business logic.",
+    loadout: ["Java", "Spring Boot", "JDBC", "Hibernate ORM", "REST APIs", "Flask", "SQL"],
+    builds: ["sswingg-platform", "automate-hub", "distributed-ecommerce"],
+    experience: true,
+  },
+  {
+    id: "iot",
+    name: "IoT & embedded",
+    brief: "Sensors and microcontrollers connected to the web: capture, stream, store and visualize.",
+    loadout: ["ESP32", "MPU6050 IMU", "BLE 4.2", "Web Bluetooth API", "Firebase Firestore", "I2C", "UART", "SPI"],
+    builds: ["iot-cricket-swing-analyzer", "sswingg-platform"],
+  },
+  {
+    id: "mobile",
+    name: "Android & mobile",
+    brief: "Native Android apps in Kotlin and Jetpack Compose, and Flutter apps that talk to Bluetooth hardware.",
+    loadout: ["Kotlin", "Jetpack Compose", "Android Studio", "Flutter", "Bluetooth LE"],
+    builds: ["minimal-launcher", "sswingg-platform"],
+  },
+  {
+    id: "data",
+    name: "Data & machine learning",
+    brief: "Exploring data, building models for regression, classification and clustering, and running simulation experiments with clear visualizations.",
+    loadout: ["Python", "Pandas", "NumPy", "SciPy", "Scikit-learn", "TensorFlow", "Matplotlib", "Power BI"],
+    builds: ["trace-edge-routing"],
+  },
+];

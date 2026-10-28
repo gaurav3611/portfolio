@@ -1,70 +1,51 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Anton, Bowlby_One, IBM_Plex_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { InkDefs } from "@/components/art/InkDefs";
 import { site } from "@/lib/data";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-});
+const anton = Anton({ variable: "--font-anton", weight: "400", subsets: ["latin"], display: "swap" });
+// Latin-only faces on purpose: the CJK fonts used before shipped ~370 @font-face rules
+// (~270 KB of render-blocking CSS) for the Latin glyphs this site actually uses.
+const plex = IBM_Plex_Sans({ variable: "--font-body", weight: ["400", "700"], subsets: ["latin"], display: "swap" });
+const bowlby = Bowlby_One({ variable: "--font-sfx-face", weight: "400", subsets: ["latin"], display: "swap" });
+const jetbrains = JetBrains_Mono({ variable: "--font-jetbrains", subsets: ["latin"], display: "swap" });
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const description =
-  "Software engineer building full-stack products, distributed backends and IoT systems — React, Spring Boot, Three.js, ESP32. M.Tech CS at VIT. Open to roles and freelance work.";
+const title = `${site.name} — Full-Stack Developer`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
-  title: {
-    default: `${site.shortName} — Software Engineer`,
-    template: `%s · ${site.shortName}`,
-  },
-  description,
+  title: { default: title, template: `%s · ${site.shortName}` },
+  description: site.description,
   keywords: [
+    "Gaurav Nitesh Gandhi",
     "Gaurav Gandhi",
-    "Software Engineer",
-    "Full Stack Developer",
-    "React Developer",
-    "Frontend Engineer",
+    "Full-Stack Developer",
+    "Computer Science",
+    "VIT Vellore",
+    "Java",
+    "Spring Boot",
+    "TypeScript",
+    "IoT",
     "Distributed Systems",
-    "IoT Developer",
-    "VIT",
-    "India",
   ],
-  authors: [{ name: site.name, url: site.url }],
+  authors: [{ name: site.name, url: site.github }],
   creator: site.name,
   openGraph: {
     type: "website",
-    url: site.url,
-    title: `${site.shortName} — Software Engineer`,
-    description,
-    siteName: site.shortName,
+    url: "/",
+    title,
+    description: site.description,
+    siteName: site.name,
     locale: "en_US",
   },
-  twitter: {
-    card: "summary_large_image",
-    title: `${site.shortName} — Software Engineer`,
-    description,
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
+  twitter: { card: "summary_large_image", title, description: site.description },
+  robots: { index: true, follow: true },
+  alternates: { canonical: "/" },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f7f7f9",
+  themeColor: "#f3f0e8",
 };
 
 const jsonLd = {
@@ -73,40 +54,24 @@ const jsonLd = {
   name: site.name,
   email: `mailto:${site.email}`,
   telephone: site.phone,
-  url: site.url,
-  jobTitle: "Software Engineer",
-  sameAs: [site.github, site.github2, site.linkedin],
-  address: { "@type": "PostalAddress", addressCountry: "IN" },
-  alumniOf: {
-    "@type": "CollegeOrUniversity",
-    name: "Vellore Institute of Technology",
-  },
-  knowsAbout: [
-    "React",
-    "Next.js",
-    "Spring Boot",
-    "Distributed Systems",
-    "IoT",
-    "Three.js",
-    "Node.js",
-  ],
+  jobTitle: "Full-Stack Developer",
+  sameAs: [site.github, site.linkedin],
+  address: { "@type": "PostalAddress", addressLocality: "Vellore", addressCountry: "IN" },
+  alumniOf: { "@type": "CollegeOrUniversity", name: "Vellore Institute of Technology" },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="en"
-      className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}
-    >
-      <body className="grain">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+    <html lang="en" className={`${anton.variable} ${plex.variable} ${bowlby.variable} ${jetbrains.variable}`}>
+      <body>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        <a
+          href="#main"
+          className="btn-ink fixed left-3 top-3 z-[100] -translate-y-24 focus:translate-y-0"
+        >
+          Skip to content
+        </a>
+        <InkDefs />
         {children}
       </body>
     </html>

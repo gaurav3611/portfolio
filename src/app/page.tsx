@@ -1,56 +1,32 @@
-import { Aurora } from "@/components/providers/Aurora";
-import { Cursor } from "@/components/providers/Cursor";
-import { CursorGlow } from "@/components/providers/CursorGlow";
-import { CursorTrail } from "@/components/providers/CursorTrail";
-import { EntryGate } from "@/components/providers/EntryGate";
-import { GateProvider } from "@/components/providers/GateProvider";
+import { InkCursor } from "@/components/providers/InkCursor";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
-import { About } from "@/components/sections/About";
-import { Achievements } from "@/components/sections/Achievements";
-import { Contact } from "@/components/sections/Contact";
-import { Education } from "@/components/sections/Education";
-import { Experience } from "@/components/sections/Experience";
+import { Cover } from "@/components/sections/Cover";
 import { Footer } from "@/components/sections/Footer";
-import { Hero } from "@/components/sections/Hero";
-import { Journey } from "@/components/sections/Journey";
-import { Navbar } from "@/components/sections/Navbar";
-import { Projects } from "@/components/sections/Projects";
-import { Skills } from "@/components/sections/Skills";
-import { TechStack } from "@/components/sections/TechStack";
+import { MissionControl } from "@/components/sections/MissionControl";
+import { Player } from "@/components/sections/Player";
+import { Street } from "@/components/sections/Street";
+import { TopBar } from "@/components/sections/TopBar";
+import { Underground } from "@/components/sections/Underground";
+
+/** Hatched gutter strip between chapters. */
+const Gutter = () => <div aria-hidden="true" className="hatch h-4 border-y-3 border-ink" />;
 
 export default function Home() {
   return (
-    <GateProvider>
-        <SmoothScroll>
-          <EntryGate />
-          <Aurora />
-          <CursorGlow />
-          <CursorTrail />
-          <Cursor />
-          <Navbar />
-        <main>
-          <Hero />
-          <hr className="hr-glow" />
-          <About />
-          <hr className="hr-glow" />
-          <Journey />
-          <hr className="hr-glow" />
-          <Skills />
-          <hr className="hr-glow" />
-          <Projects />
-          <hr className="hr-glow" />
-          <TechStack />
-          <hr className="hr-glow" />
-          <Experience />
-          <hr className="hr-glow" />
-          <Education />
-          <hr className="hr-glow" />
-          <Achievements />
-          <hr className="hr-glow" />
-            <Contact />
-          </main>
-          <Footer />
-        </SmoothScroll>
-    </GateProvider>
+    <SmoothScroll>
+      <InkCursor />
+      <TopBar />
+      {/* 2xl: reserve the fixed chapter rail's width so shelves clip beside it, not under it */}
+      <main id="main" className="2xl:pl-14">
+        <Cover />
+        <Gutter />
+        <Street />
+        <Underground />
+        <Player />
+        <Gutter />
+        <MissionControl />
+      </main>
+      <Footer />
+    </SmoothScroll>
   );
 }

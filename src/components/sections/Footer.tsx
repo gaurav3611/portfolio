@@ -1,45 +1,13 @@
-"use client";
-
-import { ArrowUp } from "lucide-react";
 import { site } from "@/lib/data";
-import { Magnetic } from "@/components/ui/MagneticButton";
 
-export function Footer() {
+/** Back cover. */
+export function Footer({ base = "" }: { base?: string }) {
   return (
-    <footer className="border-t border-foreground/8">
-      <div className="section-shell flex flex-col items-center justify-between gap-6 py-10 md:flex-row">
-        <div className="text-center md:text-left">
-          <p className="font-display font-bold">
-            gaurav<span className="text-gradient">.gandhi</span>
-          </p>
-          <p className="mt-1 text-sm text-muted">
-            © {new Date().getFullYear()} {site.shortName}. Designed & built
-            from scratch — Next.js, Three.js, Framer Motion.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-6">
-          <nav aria-label="Footer" className="flex gap-5 text-sm text-muted">
-            <a href={site.github} target="_blank" rel="noopener noreferrer" className="inline-block transition-all duration-300 hover:-translate-y-0.5 hover:text-foreground">
-              GitHub
-            </a>
-            <a href={site.linkedin} target="_blank" rel="noopener noreferrer" className="inline-block transition-all duration-300 hover:-translate-y-0.5 hover:text-foreground">
-              LinkedIn
-            </a>
-            <a href={`mailto:${site.email}`} className="inline-block transition-all duration-300 hover:-translate-y-0.5 hover:text-foreground">
-              Email
-            </a>
-          </nav>
-          <Magnetic>
-            <a
-              href="#top"
-              aria-label="Back to top"
-              className="flex size-11 items-center justify-center rounded-xl border border-foreground/12 text-muted transition-colors hover:border-foreground/30 hover:text-foreground"
-            >
-              <ArrowUp className="size-4.5" />
-            </a>
-          </Magnetic>
-        </div>
+    <footer className="mx-auto max-w-7xl px-4 pb-10">
+      <div className="panel-ink flex flex-col gap-3 px-5 py-6 sm:flex-row sm:items-center sm:justify-between">
+        <p className="font-display text-2xl uppercase tracking-wide">{site.name}</p>
+        <p className="caption text-paper/80">Vol. 1 · Vellore, India · Fin.</p>
+        <a href={`${base}#cover`} className="caption inline-flex min-h-11 items-center underline decoration-2 underline-offset-4">Back to cover ↑</a>
       </div>
     </footer>
   );
