@@ -1,6 +1,9 @@
 import { ImageResponse } from "next/og";
 import { site } from "@/lib/data";
 
+// Generated at build time (required for the static export; fine for every host).
+export const dynamic = "force-static";
+
 export const alt = `${site.name} — manga-style developer portfolio cover`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
